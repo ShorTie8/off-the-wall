@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = glibc
-VERSION = 2.18
+VERSION = 2.22
 #VERSION = 2.21
 
 EXTENSION = .tar.bz2

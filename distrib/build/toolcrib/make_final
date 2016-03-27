@@ -381,6 +381,7 @@ fi
       build ntop
       build iperf
       build apcupsd
+      build arp-scan
       build setkerneltz
       build htop
       build iptraf-ng

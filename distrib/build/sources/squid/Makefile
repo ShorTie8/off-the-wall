@@ -8,24 +8,27 @@ include ../Makefile.conf
 include ../Makefile.versions
 
 PACKAGE = squid
-VERSION = 3.5.9
+VERSION = 3.5.15
 
 BASE_URL = http://www.squid-cache.org/Versions/v3/3.5/
 
 CONFIG_OPTS += --disable-arch-native \
+	       --enable-async-io \
 	       --enable-delay-pools \
+	       --enable-follow-x-forwarded-for \
 	       --enable-http-violations \
-	       --enable-icap-client \
 	       --enable-linux-netfilter \
+	       --enable-poll \
 	       --enable-removal-policies="heap,lru" \
 	       --enable-ssl-crtd \
-	       --enable-storeio="aufs,diskd,ufs" \
+	       --enable-storeio="aufs,diskd" \
 	       --libdir=/usr/lib \
 	       --localstatedir=/var \
 	       --with-dl \
 	       --with-large-files \
 	       --with-libcap \
 	       --with-logdir=/var/log/squid \
+	       --with-max_fd=8192 \
 	       --with-openssl \
 	       --with-swapdir=/var/spool/squid
 
