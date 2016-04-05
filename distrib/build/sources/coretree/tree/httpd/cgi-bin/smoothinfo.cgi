@@ -22,8 +22,10 @@ use smoothtype qw(:standard);
 use strict;
 use warnings;
 
-my (%smoothinfosettings, %checked, %selected);
+my (%smoothinfosettings, %checked, %selected, %netsettings);
 my ($textarea, $bbcodehelp);
+
+&readhash("${swroot}/ethernet/settings", \%netsettings );
 
 my $MODDIR = "${swroot}/smoothinfo/etc";
 my $filename = "$MODDIR/report.txt";
@@ -1188,6 +1190,11 @@ print <<END
 <tr>
 	<td style='font-size:18pt'>&nbsp;</td>
 </tr>
+END
+;
+
+if ($netsettings{'ORANGE_DEV'}) {
+	print <<END
 <tr>
 	<td style='margin:0; padding:.3em; height:3em; background-color:#ffaa77; vertical-align:middle; border: solid black .2em'>
 	   <div style='vertical-align:middle; text-align:left; margin:0'>
@@ -1204,6 +1211,12 @@ print <<END
 <tr>
 	<td style='font-size:18pt'>&nbsp;</td>
 </tr>
+END
+;
+}
+
+if ($netsettings{'PURPLE_DEV'}) {
+	print <<END
 <tr>
 	<td style='margin:0; padding:.3em; height:3em; background-color:#ddaaff; vertical-align:middle; border: solid black .2em'>
 	   <div style='vertical-align:middle; text-align:left; margin:0'>
@@ -1220,6 +1233,10 @@ print <<END
 <tr>
 	<td style='font-size:18pt'>&nbsp;</td>
 </tr>
+END
+;
+}
+print <<END
 <tr>
 	<td style='margin:0; padding:.3em; height:3em; background-color:#ffaaaa; vertical-align:middle; border: solid black .2em'>
 	   <div style='vertical-align:middle; text-align:left; margin:0'>
@@ -1380,7 +1397,7 @@ if ($smoothinfosettings{'EDIT'} eq 'on') {
 >>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 }
 else {
-	$textarea = "<td style='width:50%; text-align:center;'><TEXTAREA name='data' ROWS='30' COLS='85' style='white-space: pre; word-wrap: normal; overflow-x: scroll; background:#ecece8' READONLY='yes' TITLE='$tr{'smoothinfo-report-tip'}' onclick='this.select();'>";
+	$textarea = "<td style='width:50%; text-align:center;'><TEXTAREA name='data' ROWS='30' COLS='85' style='white-space: pre; word-wrap: normal; overflow-x: scroll; background:#ecece8' READONLY TITLE='$tr{'smoothinfo-report-tip'}' onclick='this.select();'>";
 	$bbcodehelp = '';
 }
 

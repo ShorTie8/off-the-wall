@@ -44,4 +44,10 @@ install: compile
 	cd $(DIR); make DESTDIR=$(PKG_ROOT) install
 	cd $(DATA_PACKAGE)-$(DATA_VERSION); make DESTDIR=$(PKG_ROOT) install
 
+CLEAN = yes
+clean:
+	@echo -n " $(PACKAGE)"
+	@rm -rf $(PACKAGE)-$(VERSION) $(DATA_PACKAGE)-$(DATA_VERSION)
+	@rm -f usb-modeswitch-versions.xml $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz
+
 include ../Makefile.rules

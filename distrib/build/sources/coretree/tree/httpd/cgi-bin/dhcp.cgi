@@ -12,17 +12,6 @@ use lib "/usr/lib/smoothwall";
 use header qw( :standard );
 use smoothd qw( message );
 use smoothtype qw( :standard );
-<<<<<<< HEAD
-use strict;
-use Time::Local;
-
-my %dhcpsettings;
-my %netsettings;
-my $dhcptmpfile = "${swroot}/dhcp/leasesconfig";
-my $display_dhcplease = 'yes';
-my $subnet;
-my (%checked, %selected);
-=======
 use Socket qw( inet_aton );
 use strict;
 use warnings;
@@ -33,7 +22,6 @@ my $display_dhcplease = 'yes';
 my $subnet = '';
 my $refresh = '';
 my $success = '';
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 
 &showhttpheaders();
 
@@ -131,39 +119,6 @@ if ($ENV{'QUERY_STRING'} && ( not defined $dhcpsettings{'ACTION'} or $dhcpsettin
 }
 
 my $errormessage = '';
-<<<<<<< HEAD
-if ($dhcpsettings{'ACTION'} eq $tr{'save'})
-{
-	unless ($dhcpsettings{'NIS_DOMAIN'} eq "" or $dhcpsettings{'NIS_DOMAIN'} =~ /^([a-zA-Z])+([\.a-zA-Z0-9_-])+$/) {
-		$errormessage = $tr{'invalid domain name'};
-		goto ERROR;
-	}
-
-	if ($dhcpsettings{'SUBNET'} ne 'green' && $dhcpsettings{'SUBNET'} ne 'purple')
-	{
-		$errormessage = $tr{'invalid input'};
-		goto ERROR;
-	}
-	if ($dhcpsettings{'SUBNET'} ne $dhcpsettings{'CHECKSUBNET'})
-	{
-		$errormessage = 'Cannot save without selecting first.';
-		goto ERROR;
-	}
-	if (!(&validip($dhcpsettings{'START_ADDR'})))
-	{
-		$errormessage = $tr{'invalid start address'};
-		goto ERROR;
-	}
-	if (!(&validip($dhcpsettings{'END_ADDR'})))
-	{
-		$errormessage = $tr{'invalid end address'};
-		goto ERROR;
-	}
-	if (!(&ip2number($dhcpsettings{'END_ADDR'}) > &ip2number($dhcpsettings{'START_ADDR'})))
-	{
-		$errormessage = $tr{'end must be greater than start'};
-		goto ERROR;
-=======
 if ($dhcpsettings{'ACTION'} eq $tr{'save'}) {
 	unless ($dhcpsettings{'NIS_DOMAIN'} eq "" 
 	   or $dhcpsettings{'NIS_DOMAIN'} =~ /^([a-zA-Z])+([\.a-zA-Z0-9_-])+$/) {
@@ -184,7 +139,6 @@ if ($dhcpsettings{'ACTION'} eq $tr{'save'}) {
 	}
 	if (!(&ip2number($dhcpsettings{'END_ADDR'}) > &ip2number($dhcpsettings{'START_ADDR'}))) {
 		$errormessage .= $tr{'end must be greater than start'} ."<br />\n";
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 	}
 	open(FILE, "${swroot}/dhcp/staticconfig-$dhcpsettings{'SUBNET'}") or die 'Unable to open config file.';
 	my @current = <FILE>;
@@ -195,14 +149,8 @@ if ($dhcpsettings{'ACTION'} eq $tr{'save'}) {
 		my @temp = split(/\,/,$line);
 		if (($temp[5]) && $temp[5] eq 'on') {
 			unless(!((&ip2number($temp[2]) <= &ip2number($dhcpsettings{'END_ADDR'}) 
-<<<<<<< HEAD
-				&& (&ip2number($temp[2]) >= &ip2number($dhcpsettings{'START_ADDR'}))))) {
-				$errormessage = $tr{'dynamic range cannot overlap static'};
-				goto ERROR;
-=======
 			   && (&ip2number($temp[2]) >= &ip2number($dhcpsettings{'START_ADDR'}))))) {
 				$errormessage .= $tr{'dynamic range cannot overlap static'} ."<br />\n";
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 			}
 		}
 	}
@@ -212,15 +160,8 @@ if ($dhcpsettings{'ACTION'} eq $tr{'save'}) {
 			goto ERROR;
 		}
 	}
-<<<<<<< HEAD
-	if (!($dhcpsettings{'DNS1'}) && $dhcpsettings{'DNS2'})
-	{
-		$errormessage = $tr{'cannot specify secondary dns without specifying primary'};
-		goto ERROR;
-=======
 	if (!($dhcpsettings{'DNS1'}) && $dhcpsettings{'DNS2'}) {
 		$errormessage .= $tr{'cannot specify secondary dns without specifying primary'} ."<br />\n";
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 	}
 	if ($dhcpsettings{'DNS2'}) {
 		if (!(&validip($dhcpsettings{'DNS2'}))) {
@@ -234,15 +175,8 @@ if ($dhcpsettings{'ACTION'} eq $tr{'save'}) {
 			goto ERROR;
 		}
 	}
-<<<<<<< HEAD
-	if (!($dhcpsettings{'NTP1'}) && $dhcpsettings{'NTP2'})
-	{
-		$errormessage = $tr{'cannot specify secondary ntp without specifying primary'};
-		goto ERROR;
-=======
 	if (!($dhcpsettings{'NTP1'}) && $dhcpsettings{'NTP2'}) {
 		$errormessage .= $tr{'cannot specify secondary ntp without specifying primary'} ."<br />\n";
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 	}
 	if ($dhcpsettings{'NTP2'}) {
 		if (!(&validip($dhcpsettings{'NTP2'}))) {
@@ -250,27 +184,6 @@ if ($dhcpsettings{'ACTION'} eq $tr{'save'}) {
 			goto ERROR;
 		}
 	}
-<<<<<<< HEAD
-	if (!($dhcpsettings{'WINS1'}) && $dhcpsettings{'WINS2'})
-	{
-		$errormessage = $tr{'cannot specify secondary wins without specifying primary'}; 
-		goto ERROR;
-	}
-	if ($dhcpsettings{'WINS1'})
-	{
-		if (!(&validip($dhcpsettings{'WINS1'})))
-		{
-			$errormessage = $tr{'invalid primary wins'};
-			goto ERROR;
-		}
-	}
-	if ($dhcpsettings{'WINS2'})
-	{
-		if (!(&validip($dhcpsettings{'WINS2'})))
-		{
-			$errormessage = $tr{'invalid secondary wins'};
-			goto ERROR;
-=======
 	if (!($dhcpsettings{'WINS1'}) && $dhcpsettings{'WINS2'}) {
 		$errormessage .= $tr{'cannot specify secondary wins without specifying primary'} ."<br />\n"; 
 	}
@@ -282,7 +195,6 @@ if ($dhcpsettings{'ACTION'} eq $tr{'save'}) {
 	if ($dhcpsettings{'WINS2'}) {
 		if (!(&validip($dhcpsettings{'WINS2'}))) {
 			$errormessage .= $tr{'invalid secondary wins'} ."<br />\n";
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 		}
 	}
 	if (!($dhcpsettings{'DNS1'}) && $dhcpsettings{'DNS2'}) {
@@ -309,22 +221,6 @@ if ($dhcpsettings{'ACTION'} eq $tr{'save'}) {
 			goto ERROR;
 		}
 	}
-<<<<<<< HEAD
-	unless (!$dhcpsettings{'DOMAIN_NAME'} || $dhcpsettings{'DOMAIN_NAME'} =~ /^([a-zA-Z])+([\.a-zA-Z0-9_-])+$/) {
-		$errormessage = $tr{'invalid domain name'};
-		goto ERROR;
-	}
-	if (!($dhcpsettings{'DEFAULT_LEASE_TIME'} =~ /^\d+$/))
-	{
-		$errormessage = $tr{'invalid default lease time'};
-		goto ERROR;
-	}
-	if (!($dhcpsettings{'MAX_LEASE_TIME'} =~ /^\d+$/))
-	{
-		$errormessage = $tr{'invalid max lease time'};
-		goto ERROR;
-	}
-=======
 	unless (!$dhcpsettings{'DOMAIN_NAME'} 
 	   || $dhcpsettings{'DOMAIN_NAME'} =~ /^([a-zA-Z])+([\.a-zA-Z0-9_-])+$/) {
 		$errormessage .= $tr{'invalid domain name'} ."<br />\n";
@@ -346,7 +242,6 @@ if ($dhcpsettings{'ACTION'} eq $tr{'save'}) {
 #	if ($dhcpsettings{'BOOT_FILE'} ne "" and ! ($dhcpsettings{'BOOT_FILE'} =~ m=[^/<>'"]*=)) {
 #		$errormessage .= "FIX_TR bad boot file name". $tr{'invalid boot_file_name'} ."<br />\n";
 #	}
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 	
 ERROR:
 	if ($errormessage) {
@@ -356,12 +251,8 @@ ERROR:
 		$dhcpsettings{'VALID'} = 'yes';
 	}
 		
-<<<<<<< HEAD
-	my %tempsettings;
-=======
 	if ($dhcpsettings{'VALID'} eq 'yes') {
 		my %tempsettings;
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 	
 	$tempsettings{'BOOT_ENABLE'} = $dhcpsettings{'BOOT_ENABLE'};
 	$tempsettings{'BOOT_SERVER'} = $dhcpsettings{'BOOT_SERVER'};
@@ -370,17 +261,10 @@ ERROR:
 	
 	&writehash("${swroot}/dhcp/global", \%tempsettings);
 	
-<<<<<<< HEAD
-	delete $dhcpsettings{'STATIC_DESC'};
-	delete $dhcpsettings{'STATIC_MAC'};
-	delete $dhcpsettings{'STATIC_IP'};
-	delete $dhcpsettings{'DEFAULT_ENABLE_STATIC'};
-=======
 		$dhcpsettings{'STATIC_DESC'} = '';
 		$dhcpsettings{'STATIC_MAC'} = '';
 		$dhcpsettings{'STATIC_IP'} = '';
 		$dhcpsettings{'DEFAULT_ENABLE_STATIC'} = 'on';
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 	
 	&writehash("${swroot}/dhcp/settings-$dhcpsettings{'SUBNET'}", \%dhcpsettings);
 
@@ -390,13 +274,6 @@ ERROR:
 	{
 		unlink "${swroot}/dhcp/uptodate";
 	
-<<<<<<< HEAD
-		my $success = message('dhcpdrestart');
-		
-		if (not defined $success) {
-			$errormessage = $tr{'smoothd failure'}; 
-		}
-=======
 		$success = message('dhcpdrestart');
 		$errormessage .= $success."<br />" if ($success);
 		$errormessage .= "DHCPD Restart:". $tr{'smoothd failure'} ."<br />\n" unless ($success);
@@ -407,8 +284,7 @@ ERROR:
 		$errormessage .= $success."<br />" if ($success);
 		$errormessage .= "DNSProxy SIGHUP:". $tr{'smoothd failure'} ."<br />\n" unless ($success);
 
-		$refresh = "<meta http-equiv='refresh' content='2;'>";
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
+		$refresh = "<meta http-equiv='refresh' content='2;'>" unless ($errormessage =~ /fail/i || $errormessage =~ /$tr{'smoothd failure'}/);
 	}
 }
 
@@ -427,25 +303,6 @@ if ($dhcpsettings{'ACTION'} eq $tr{'add'}) {
 	my $withinnetwork = ( in_subnet( $dhcpsettings{'STATIC_IP'}, "$ifsubnet\/$ifmask" ) );
 
 	# Munge the MAC into something good.
-<<<<<<< HEAD
-	my $mac = $dhcpsettings{'STATIC_MAC'};
-	$mac =~ s/[^0-9a-f]//ig;
-	$mac = uc($mac);
-	$mac =~ /^(..)(..)(..)(..)(..)(..)$/;
-	$mac = "$1:$2:$3:$4:$5:$6";
-	if (&validmac($mac)) {
-		$dhcpsettings{'STATIC_MAC'} = $mac; }
-
-	unless($dhcpsettings{'STATIC_HOST'}) { $errormessage = $tr{'please enter a host name'}; }
-	unless($dhcpsettings{'STATIC_HOST'} =~ /^([a-zA-Z])+([\.a-zA-Z0-9_-])+$/) { $errormessage = $tr{'invalid host name'}; }
-	unless(&validmac($dhcpsettings{'STATIC_MAC'})) { $errormessage = $tr{'mac address not valid'}; }
-	unless(&validip($dhcpsettings{'STATIC_IP'})) { $errormessage = $tr{'ip address not valid'}; }
-	if ($dhcpsettings{'DEFAULT_ENABLE_STATIC'} eq 'on')
-	{
-		unless(!((&ip2number($dhcpsettings{'STATIC_IP'}) <= &ip2number($dhcpsettings{'END_ADDR'}) 
-			&& (&ip2number($dhcpsettings{'STATIC_IP'}) >= &ip2number($dhcpsettings{'START_ADDR'}))))) {
-			$errormessage = $tr{'static must be outside dynamic range'};
-=======
 	if ($dhcpsettings{'STATIC_MAC'}) {
 		my $mac = $dhcpsettings{'STATIC_MAC'};
 		$mac =~ s/[^0-9a-f]//ig;
@@ -465,7 +322,6 @@ if ($dhcpsettings{'ACTION'} eq $tr{'add'}) {
 		unless(!((&ip2number($dhcpsettings{'STATIC_IP'}) <= &ip2number($dhcpsettings{'END_ADDR'}) 
 		   && (&ip2number($dhcpsettings{'STATIC_IP'}) >= &ip2number($dhcpsettings{'START_ADDR'}))))) {
 			$errormessage .= $tr{'static must be outside dynamic range'} ."<br />\n";
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 		}
 	}
 	open(FILE, "${swroot}/dhcp/staticconfig-$dhcpsettings{'SUBNET'}") or die 'Unable to open config file.';
@@ -487,16 +343,8 @@ if ($dhcpsettings{'ACTION'} eq $tr{'add'}) {
 			}
 		}
 	}
-<<<<<<< HEAD
-	unless($dhcpsettings{'STATIC_DESC'} =~ /^([a-zA-Z 0-9]*)$/) { $errormessage = $tr{'description contains bad characters'}; }
-	unless(&validmac($dhcpsettings{'STATIC_MAC'})) { $errormessage = $tr{'mac address not valid'}; }
-	unless(&validip($dhcpsettings{'STATIC_IP'})) { $errormessage = $tr{'ip address not valid'}; }
-	unless ($errormessage)
-	{
-=======
 
 	unless ($errormessage) {
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 		open(FILE, ">>${swroot}/dhcp/staticconfig-$dhcpsettings{'SUBNET'}") or die 'Unable to open config file.';
 		flock FILE, 2;
 		print FILE "$dhcpsettings{'STATIC_HOST'},$dhcpsettings{'STATIC_MAC'},$dhcpsettings{'STATIC_IP'},$dhcpsettings{'STATIC_DESC'},$dhcpsettings{'DEFAULT_ENABLE_STATIC'}\n";
@@ -520,23 +368,11 @@ if ($dhcpsettings{'ACTION'} eq $tr{'remove'} || $dhcpsettings{'ACTION'} eq $tr{'
 	my $line;
 	foreach $line (@current) {
 		$id++;
-<<<<<<< HEAD
-		if ($dhcpsettings{$id} eq "on") {
-			$count++; }
-	}
-	if ($count == 0) {
-		$errormessage = $tr{'nothing selected'}; }
-	if ($count > 1 && $dhcpsettings{'ACTION'} eq $tr{'edit'}) {
-		$errormessage = $tr{'you can only select one item to edit'}; }
-	unless ($errormessage)
-	{
-=======
 		$count++ if (($dhcpsettings{$id}) && $dhcpsettings{$id} eq "on");
 	}
 	$errormessage .= $tr{'nothing selected'} ."<br />\n" if ($count == 0);
 	$errormessage .= $tr{'you can only select one item to edit'} ."<br />\n" if ($count > 1 && $dhcpsettings{'ACTION'} eq $tr{'edit'});
 	unless ($errormessage) {
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 		open(FILE, ">${swroot}/dhcp/staticconfig-$dhcpsettings{'SUBNET'}") or die 'Unable to open config file.';
 		flock FILE, 2;
  		$id = 0;
@@ -943,121 +779,6 @@ sub ip2number
 
 sub dhcp_lease_table
 {
-<<<<<<< HEAD
-### Simple DHCP Lease Viewer (2007-0905) put together by catastrophe
-# - Borrowed "dhcpLeaseData" subroutine from dhcplease.pl v0.2.5 (DHCP Pack v1.3) for SWE2.0
-# by Dane Robert Jones and Tiago Freitas Leal
-# - Borrowed parts of "displaytable" subroutine from smoothtype.pm
-# (SmoothWall Express "Types" Module) from SWE3.0 by the SmoothWall Team
-# - Josh DeLong - 09/15/07 - Added unique filter
-# - Josh DeLong - 09/16/07 - Fixed sort bug and added ability to sort columns
-# - Josh DeLong - 10/1/07 - Rewrote complete dhcp.cgi to use this code
-###
-
-my $leaseCount = -1;
-my $dhcpstart = substr($dhcpsettings{'START_ADDR'}, 0, rindex($dhcpsettings{'START_ADDR'}, ".") + 1);
-
-my $dhcplIPAddy = " ";
-my $dhcplStart = " ";
-my $dhcplEnd = " ";
-my $dhcplBinding = " ";
-my $dhcplMACAddy = " ";
-my $dhcplHostName = " ";
-
-my (@lineSplit, @dhcplIPAddy, @dhcplStart, @dhcplEnd, @dhcplBinding, @dhcplMACAddy);
-my (@dhcplHostName);
-
-# Location of DHCP Lease File
-my $datfile = "/usr/etc/dhcpd.leases";
-my @catleasesFILENAME = `cat $datfile`;
-chomp (@catleasesFILENAME);
-for (my $i=1; $i <= $#catleasesFILENAME; $i++){
-  my $datLine = $catleasesFILENAME[$i];
-
-
-  if ($datLine =~ /^#/) {
-  # Ignores comments
-  } else {
-      for ($datLine) {
-      # Filter out leading & training spaces, double quotes, and remove end ';'
-      s/^\s+//;
-      s/\s+$//;
-      s/\;//;
-      s/\"//g;
-      }
-      if ($datLine =~ /^lease/) {
-
-        $leaseCount++;      # Found start of lease
-        @lineSplit = split(/ /,$datLine);       # Extract IP Address
-        $dhcplIPAddy[$leaseCount] = $lineSplit[1];
-
-      } elsif ($datLine =~ /^starts/) {
-
-        @lineSplit = split(/ /,$datLine);     # Extract Lease Start Date
-        $dhcplStart[$leaseCount] = "$lineSplit[2] $lineSplit[3]";
-
-      } elsif ($datLine =~ /^ends/) {
-
-        @lineSplit = split(/ /,$datLine);     # Extract Lease End Date
-        $dhcplEnd[$leaseCount] = "$lineSplit[2] $lineSplit[3]";
-
-      } elsif ($datLine =~ /^binding state active/) {
-
-        $dhcplBinding[$leaseCount] = "on";    # Set 'on'
-
-      } elsif ($datLine =~ /^binding state free/) {
-
-        $dhcplBinding[$leaseCount] = "off";    # Set 'off'
-
-      } elsif ($datLine =~ /^hardware ethernet/) {
-
-        @lineSplit = split(/ /,$datLine);     # Extract MAC Address
-        $dhcplMACAddy[$leaseCount] = uc($lineSplit[2]); # Make MAC Address All Upper Case for page consistancy.
-
-      } elsif ($datLine =~ /^client-hostname/ || $datLine =~ /^hostname/) {
-
-        @lineSplit = split(/ /,$datLine);     # Extract Host Name
-        $dhcplHostName[$leaseCount] = $lineSplit[1];
-      }
-    }
-}
-
-my @dhcptemparray;
-open(FILE, ">$dhcptmpfile") or die 'Unable to open dhcp leasesconfig file.';
-flock FILE, 2;
-
-  for (my $i = $#dhcplIPAddy; $i >= 0; $i--) {
-    my $catLINEnumber = $i+1;
-    my $dhcpprintvar = "True";
-
-    if ($i == $#dhcplIPAddy){
-        push(@dhcptemparray, $dhcplIPAddy[$i]);
-    }
-    else {
-        foreach my $IP (@dhcptemparray) {
-            if ($IP =~ $dhcplIPAddy[$i]) {
-                $dhcpprintvar = "False";
-            }
-        }
-    }
-
-    if (index($dhcplIPAddy[$i], $dhcpstart) == -1 )
-    {
-      $dhcpprintvar = "False"
-    }
-
-    # Printing values to temp file
-    if ($dhcpprintvar =~ "True"){
-      my $leaseStart = UTC2LocalString($dhcplStart[$i]);
-      my $leaseEnd   = UTC2LocalString($dhcplEnd[$i]);
-
-      push(@dhcptemparray, $dhcplIPAddy[$i]);
-      print FILE "$catLINEnumber,$dhcplIPAddy[$i],$leaseStart,$leaseEnd,$dhcplMACAddy[$i],$dhcplHostName[$i],$dhcplBinding[$i],\n";
-    }
-  }
-close(FILE);
-}
-=======
 	### Simple DHCP Lease Viewer (2007-0905) put together by catastrophe
 	# - Borrowed "dhcpLeaseData" subroutine from dhcplease.pl v0.2.5 (DHCP Pack v1.3) for SWE2.0
 	# by Dane Robert Jones and Tiago Freitas Leal
@@ -1127,7 +848,6 @@ close(FILE);
 			}
 		}
 	}
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 
 	open(FILE, ">$dhcptmpfile") or die 'Unable to open dhcp leasesconfig file.';
 	flock FILE, 2;
@@ -1164,5 +884,4 @@ close(FILE);
 	}
 	close(FILE);
 }
-
 

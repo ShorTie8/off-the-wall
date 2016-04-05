@@ -113,7 +113,8 @@ if ($cgitimesettings{'ACTION'} eq $tr{'save'}) {
 	}
 
 	# Validate server
-	if ( !(validip($cgitimesettings{'NTP_SERVER'}) or validhostname($cgitimesettings{'NTP_SERVER'}))) {
+        if (($cgitimesettings{'NTP_SERVER'} ne "") and
+           (!(validip($cgitimesettings{'NTP_SERVER'}) or validhostname($cgitimesettings{'NTP_SERVER'})))) {
 		$errormessage .= $tr{'time invalid server'} ."<br />";
 	}	
 	# End of validations
@@ -157,15 +158,15 @@ if ($cgitimesettings{'ACTION'} eq $tr{'save'}) {
 
 			# Update the kernel's time zone, H/W Clock, and DST cron task
 			my $success = message('ntpdchgtimezone');
-			$errormessage .= $success."<br />";
-			$errormessage .= $tr{'smoothd failure'} ." (ntpdchgtimezone)<br />" unless ($success);
+			$errormessage .= $success."<br />" if ($success);
+			$errormessage .= "ntpdchgtimezone ".$tr{'smoothd failure'}."<br />" unless ($success);
 		}
 
 		# The smoothd plugin always stops, then checks 'enabled' before restarting.
 		my $success = message('ntpdrestart');
-		$errormessage .= $success;
-		$errormessage .= $tr{'smoothd failure'} ." (ntpdrestart)<br />" unless ($success);
-		$refresh = '<meta http-equiv="refresh" content="2;">';
+		$errormessage .= $success if ($success);
+		$errormessage .= " ntpdrestart ".$tr{'smoothd failure'}."<br />" unless ($success);
+		$refresh = '<meta http-equiv="refresh" content="2;">' unless ($errormessage =~ /fail/i || $errormessage =~ /$tr{'smoothd failure'}/);
 
 	}
 
@@ -183,7 +184,6 @@ $timesettings{'TIMEZONE'} = 'Europe/London' if ($timesettings{'TIMEZONE'} eq "")
 $timesettings{'ENABLED'} = 'off' if ($timesettings{'ENABLED'} eq "");
 $timesettings{'NTP_INTERVAL'} = 6 if ($timesettings{'NTP_INTERVAL'} eq "");
 $timesettings{'NTP_METHOD'} = $tr{'time method automatic'} if ($timesettings{'NTP_METHOD'} eq "");
-$timesettings{'NTP_SERVER'} = 'pool.ntp.org' if ($timesettings{'NTP_SERVER'} eq "");
 $timesettings{'YEAR'} = '';
 $timesettings{'MONTH'} = '';
 $timesettings{'DAY'} = '';

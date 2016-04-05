@@ -175,7 +175,8 @@ foreach my $mount (@echo) {
    chomp($mount);
 	my ($dev, $size, $size_used, $size_avail, $size_percentage, $mount_point) = split(/\s+/,$mount);
 
-	$size_percentage =~ s/\%//;
+	$size_percentage =~ s/[^\d]//g;
+	$size_percentage ||= 0;
 
 	if (int($size_percentage) > $graphalertcritical) {
 		$graphbgcolour = $graphcriticalcolour;
@@ -271,7 +272,8 @@ foreach my $mount (@echo) {
    chomp($mount);
 	my ($dev, $size, $size_used, $size_avail, $size_percentage, $mount_point) = split(/\s+/,$mount);
 
-	$size_percentage =~ s/\%//g;
+	$size_percentage =~ s/[^\d]//g;
+	$size_percentage ||= 0;
 
 	if (int($size_percentage) > $graphalertcritical) {
 		$graphbgcolour = $graphcriticalcolour;
