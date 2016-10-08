@@ -3,8 +3,8 @@
 cache_effective_user squid
 cache_effective_group squid
 
-cache_swap_high 100
-cache_swap_low 80
+cache_swap_high 92
+cache_swap_low 90
 
 cache_mem 256 MB
 maximum_object_size_in_memory 512 KB
@@ -18,3 +18,9 @@ cache_store_log none
 error_directory /usr/share/errors/en-us
 log_mime_hdrs off
 
+# Recommended settings from squid-cache.org.
+# Reference: http://www.squid-cache.org/Doc/config/refresh_pattern/ [^]
+refresh_pattern ^ftp:			1440	20%	1440
+refresh_pattern ^gopher:		1440	0%	1440
+refresh_pattern -i (/cgi-bin/|\?)	0	0%	0
+refresh_pattern .			0	20%	4320

@@ -23,7 +23,7 @@ int handlerestore(void)
 {
 	int result = 0;
 
-	if (newtWinChoice(TITLE, ctr[TR_OK], ctr[TR_CANCEL], ctr[TR_PLEASE_INSERT_THE_RESTORE_FLOPPY_DISK]) == 2)
+	if (newtWinChoice(ctr[TR_RESTORE_CONFIGURATION], ctr[TR_OK], ctr[TR_CANCEL], ctr[TR_PLEASE_INSERT_THE_RESTORE_FLOPPY_DISK]) == 2)
                 return 0;
 
 	if (runcommandwithstatus("/usr/bin/tar -xf /dev/fd0 -C " CONFIG_ROOT "/restore",
@@ -33,7 +33,7 @@ int handlerestore(void)
 		goto ERROR;
 	}
 
-	if (newtWinChoice(TITLE, ctr[TR_OK], ctr[TR_CANCEL], ctr[TR_DO_YOU_WISH_TO_RESTORE]) == 2)
+	if (newtWinChoice(ctr[TR_RESTORE_CONFIGURATION], ctr[TR_OK], ctr[TR_CANCEL], ctr[TR_DO_YOU_WISH_TO_RESTORE]) == 2)
                 return 0;
 
 	if (runcommandwithstatus("/etc/rc.d/restorescript", ctr[TR_RESTORING]))
@@ -45,10 +45,11 @@ int handlerestore(void)
 	result = 1;
 	performedrestore = 1;
 
-	if (!automode)
+	if (automode == 1)
+		/* Only auto-reboot after initial install */
 		rebootrequired = 1;                                                                
 
-	newtWinMessage(TITLE, ctr[TR_OK], ctr[TR_CONFIGURATION_SUCCESSFULLY_RESTORED]);
+	newtWinMessage(ctr[TR_RESTORE_CONFIGURATION], ctr[TR_OK], ctr[TR_CONFIGURATION_SUCCESSFULLY_RESTORED]);
 
 ERROR:
 	return result;

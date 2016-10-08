@@ -1,14 +1,15 @@
 # Copyright 2004-2010 SmoothWall Ltd
 
 include ../Makefile
-include ../Makefile.conf
 include ../Makefile.versions
+PRINTVERSION = yes
+include ../Makefile.conf
 
 PACKAGE = kernel-drivers
 
 VERSION = $(KERNEL_VERSION)
 
-export KERNEL_DIR = $(SOURCES_DIR)/linux$(KERNEL_TYPE)/linux
+export KERNEL_DIR = $(SOURCES_DIR)/linux/linux
 export DRIVER_DIR = $(SOURCES_DIR)/${PACKAGE}
 
 IGB_VER = 5.3.3.2
@@ -60,6 +61,7 @@ prepare: download
 	tar -xvf $(DOWNLOADS_DIR)/AX88179_178A_LINUX_DRIVER_v$(ASIX_88179_178A_VER)_SOURCE.tar.gz
 	cd AX88179_178A_LINUX_DRIVER_v$(ASIX_88179_178A_VER)_SOURCE; \
 	  patch -p1 < ../ax88179-makefile.patch
+	mkdir -p $(PKG_ROOT)
 
 
 # The compile section
@@ -138,11 +140,9 @@ package-asix-88179_178a: compile-asix-88179_178a
 
 # The tarball section
 $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz: prepare $(PACKAGES)
-	@( \
 	  cd $(PKG_ROOT); \
 	  tar cvfz $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz .; \
-	  tar xvf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz -C / \
-	)
+	  tar xvf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz -C /
 
 clean:
 	@echo -n " $(PACKAGE)"
@@ -159,10 +159,22 @@ clean:
 	@rm -rf nct6775-$(NCT6775_VER)
 	@rm -rf AX88179_178A_LINUX_DRIVER_v$(ASIX_88179_178A_VER)_SOURCE
 ifeq ($(BUILD_PHASE), Final)
-	@rm -rf $(PKG_ROOT); mkdir -p $(PKG_ROOT)
+	@rm -rf $(PKG_ROOT)
 endif
 
 all: $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz
 
 packageinfo.html:
 	echo "<li><span style='font-size:large;'>$(PACKAGE) $(KERNEL_VER)</span><br>" >>/tmp/packageinfo.html
+
+print-version:
+	@echo "IGB $(IGB_VER)"
+	@echo "IXGBE $(IXGBE_VER)"
+	@echo "E1000E $(E1000E_VER)"
+	@echo "IGBVF $(IGBVF_VER)"
+	@echo "IXGBEVF $(IXGBEVF_VER)"
+	@echo "I40EVF $(I40EVF_VER)"
+	@echo "I40E $(I40E_VER)"
+	@echo "R8168 $(R8168_VER)"
+	@echo "NCT6775 $(NCT6775_VER)"
+	@echo "ASIX_88179_178A $(ASIX_88179_178A_VER)"

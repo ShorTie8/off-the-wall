@@ -19,7 +19,6 @@ install: compile
 	@install -D $(COMPILE_DIR)/smoothd.pm $(PKG_ROOT)/usr/lib/smoothwall/smoothd.pm
 
 	@install -D $(COMPILE_DIR)/sysadvnet.so $(PKG_ROOT)/usr/lib/smoothd/sysadvnet.so 
-	@install -D $(COMPILE_DIR)/sysalcatel.so $(PKG_ROOT)/usr/lib/smoothd/sysalcatel.so 
 	@install -D $(COMPILE_DIR)/sysapcupsd.so $(PKG_ROOT)/usr/lib/smoothd/sysapcupsd.so 
 	@install -D $(COMPILE_DIR)/sysclamav.so $(PKG_ROOT)/usr/lib/smoothd/sysclamav.so 
 	@install -D $(COMPILE_DIR)/sysdhcpd.so $(PKG_ROOT)/usr/lib/smoothd/sysdhcpd.so 
@@ -32,6 +31,7 @@ install: compile
 	@install -D $(COMPILE_DIR)/sysiptables.so $(PKG_ROOT)/usr/lib/smoothd/sysiptables.so 
 	@install -D $(COMPILE_DIR)/sysntpd.so $(PKG_ROOT)/usr/lib/smoothd/sysntpd.so 
 	@install -D $(COMPILE_DIR)/sysp3scan.so $(PKG_ROOT)/usr/lib/smoothd/sysp3scan.so 
+	@install -D $(COMPILE_DIR)/sysrestore.so $(PKG_ROOT)/usr/lib/smoothd/sysrestore.so 
 	@install -D $(COMPILE_DIR)/sysshutdown.so $(PKG_ROOT)/usr/lib/smoothd/sysshutdown.so 
 	@install -D $(COMPILE_DIR)/syssip.so $(PKG_ROOT)/usr/lib/smoothd/syssip.so 
 	@install -D $(COMPILE_DIR)/syssmoothinfo.so $(PKG_ROOT)/usr/lib/smoothd/syssmoothinfo.so 

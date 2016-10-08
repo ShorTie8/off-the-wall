@@ -13,18 +13,20 @@ VERSION = 2.22
 EXTENSION = .tar.bz2
 
 BASE_URL =  ftp://ftp.gnu.org/gnu/glibc
-TZ_VERSION = 2013h
+TZ_VERSION = 2016f
 TZ_TARBALL = tzdata$(TZ_VERSION).tar.gz
 TZ_URL =  http://www.iana.org/time-zones/repository/releases/$(TZ_TARBALL)
 
 COMPILE_DIR = $(DIR)-compile
 
+DOWNLOAD = yes
+download:
+	@$(DL_CMD) $(BASE_URL)/$(PACKAGE)-$(VERSION)$(EXTENSION)
+	@$(DL_CMD) $(TZ_URL)
+
 # Phase 1 compile
 #
 ifeq ($(BUILD_PHASE), Stage_1)
-
-#PATCH_FILE1 = glibc-2.14.1-gcc_fix-1.patch
-#PATCH_FILE2 = glibc-2.14.1-cpuid-1.patch
 
 # Phase 1 glibc builds with phase 1 binutils/gcc (SWE_TGT)
 CONFIG_OPTS = \
@@ -88,11 +90,6 @@ CONFIG_OPTS = \
 
 #	      --enable-add-ons \
 
-DOWNLOAD = yes
-download:
-	$(DL_CMD) $(BASE_URL)/$(PACKAGE)-$(VERSION)$(EXTENSION)
-	$(DL_CMD) $(TZ_URL)
-
 PREPARE = yes
 # Prepare
 $(DIR)/: download
@@ -115,6 +112,7 @@ else
 endif
 endif
 	cd $(DIR); sed -i -e 's/static __m128i/inline &/' sysdeps/x86_64/multiarch/strstr.c
+	cd $(DIR); sed -i -e 's/3\.79/4.* | 3.79/' configure
 
 
 COMPILE = yes

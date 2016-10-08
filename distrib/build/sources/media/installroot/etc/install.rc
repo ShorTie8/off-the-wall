@@ -112,9 +112,8 @@ function EXITTRAP {
 }
 
 echo -e "${BOUL}Wait for udev to settle${NO}"
-while [ -e /tmp/trigger-lock ]; do
-  usleep 100000
-done
+/sbin/udevadm hwdb --update
+/sbin/udevadm settle
 
 typeset -i i tries
 tries=0
@@ -143,6 +142,12 @@ unset i tries
 . /etc/eth-addr-sort
 
 sleep 2
+
+# Load FSen
+for i in ext2 vfat isofs udf; do
+  modprobe $i&
+done
+wait >/dev/null 2>&1
 
 echo "1 4 1 7" >/proc/sys/kernel/printk
 

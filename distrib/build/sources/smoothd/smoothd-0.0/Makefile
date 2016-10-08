@@ -19,10 +19,10 @@ MAIN = main.cpp
 LIBS = -L. -ldl -lsmoothd -lxtables -lip4tc
 BIN = smoothd
 
-MODULES = sysshutdown sysinstall sysim sysp3scan sysalcatel sysdhcpd sysdnsproxy \
+MODULES = sysshutdown sysinstall sysim sysp3scan sysdhcpd sysdnsproxy \
 	sysntpd syssnort syssquid syssshd sysupnpd sysadvnet sysapcupsd sysipblock \
 	sysxtaccess sysupdown sysipsec systimeset sysiptables systraffic syssip sysclamav \
-	systimedaccess syssmoothinfo syssquidguard
+	systimedaccess syssmoothinfo syssquidguard sysrestore
 
 MODULEFLAGS = $(CXXFLAGS) -shared -Wl,-soname,$@.so -o $@.so $@.cpp $(LIBS)
 
@@ -47,8 +47,6 @@ sysadvnet : libsmoothd.so $(OBJS)
 	$(CXX) $(MODULEFLAGS)
 sysapcupsd : libsmoothd.so $(OBJS)  
 	$(CXX) $(MODULEFLAGS)
-sysalcatel : libsmoothd.so $(OBJS)  
-	$(CXX) $(MODULEFLAGS)
 sysclamav : libsmoothd.so $(OBJS)
 	$(CXX) $(MODULEFLAGS)
 sysdhcpd : libsmoothd.so $(OBJS)  
@@ -68,6 +66,8 @@ sysipsec : libsmoothd.so $(OBJS)
 sysntpd : libsmoothd.so $(OBJS)  
 	$(CXX) $(MODULEFLAGS)
 sysp3scan : libsmoothd.so $(OBJS)  
+	$(CXX) $(MODULEFLAGS)
+sysrestore : libsmoothd.so $(OBJS)  
 	$(CXX) $(MODULEFLAGS)
 sysshutdown : libsmoothd.so $(OBJS)  
 	$(CXX) $(MODULEFLAGS)

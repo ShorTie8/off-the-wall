@@ -47,11 +47,23 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 	
-	if (argc >= 3) {
-		if (strncmp(argv[2], "networkingOnly", 15) == 0) {
-			automode = 2;
-		} else {
+	/* Engage auto operation (run through 'normal' selections automatically) */
+	if (argc >= 3)
+	{
+		if (strlen(argv[2]) == 12 && strncmp(argv[2], "firstInstall", 12) == 0)
+		{
+			/* This execution only follows the installer; outgoing rules are cleared */
 			automode = 1;
+		}
+		else if (strlen(argv[2]) == 15 && strncmp(argv[2], "networkingOnly", 15) == 0)
+		{
+			/* This execution only runs during bootup when the NICs have changed */
+			automode = 2;
+		}
+		else
+		{
+			/* All other values mean generic auto mode during normal operation */
+			automode = 3;
 		}
 	}
 	
@@ -70,11 +82,12 @@ int main(int argc, char *argv[])
 	newtInit();
 	newtCls();
 
-	newtDrawRootText(0, 0, "Smoothwall " PRODUCT_NAME PRODUCT_EXTRA " (" PRODUCT_ARCH ") -- http://smoothwall.org/");
+	newtDrawRootText(0, 0, TITLE " -- http://smoothwall.org/");
 	newtPushHelpLine(ctr[TR_HELPLINE]);		
 
 	if (automode == 0)
 	{
+		/* Admin selects each menu item individually */
 		sections[0] = ctr[TR_RESTORE_CONFIGURATION];
 		sections[1] = ctr[TR_KEYBOARD_MAPPING];
 		sections[2] = ctr[TR_TIMEZONE];
@@ -168,16 +181,19 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-	else if (automode == 2) {
+	else if (automode == 2)
+	{
+		/* Admin specified networkingOnly as the third arg */
+		/* This happens when the NIC change and rc.sysint runs setup */
 		handlenetworking();
 		autook = 2;
 	}
 	else
 	{
-		
+		/* automode is 1 (firstInstall) or 3 (generic) */
 		usbfail = 1;
 				
-		if (newtWinChoice(TITLE, ctr[TR_NO], ctr[TR_YES],
+		if (newtWinChoice(ctr[TR_RESTORE_CONFIGURATION], ctr[TR_NO], ctr[TR_YES],
 			ctr[TR_RESTORE_LONG]) != 1)
 		{
 			if (!(handlerestore()))
@@ -247,10 +263,10 @@ int main(int argc, char *argv[])
 	}
 
 EXIT:	
-	if (automode == 1)
+	if (automode == 1 || automode == 3)
 	{
 		if (autook)
-			newtWinMessage(TITLE, ctr[TR_OK], ctr[TR_SETUP_FINISHED]);
+			newtWinMessage("", ctr[TR_OK], ctr[TR_SETUP_FINISHED]);
 		else
 			newtWinMessage(ctr[TR_WARNING], ctr[TR_OK], ctr[TR_SETUP_NOT_COMPLETE]);
 	}
@@ -273,7 +289,7 @@ EXIT:
 	{
 		if (rebootrequired)
 		{
-			if (newtWinChoice(TITLE, ctr[TR_YES], ctr[TR_NO],
+			if (newtWinChoice("", ctr[TR_YES], ctr[TR_NO],
 				ctr[TR_DO_YOU_WANT_TO_REBOOT]) != 2)
 			{
 				doreboot = 1;

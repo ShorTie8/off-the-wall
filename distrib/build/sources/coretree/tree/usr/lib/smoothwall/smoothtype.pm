@@ -29,7 +29,7 @@ sub tooltip
 	my $oplist;
 
 	foreach my $option ( keys %$options ) {
-		$oplist .= "this.$option = '$options->{$option}';"
+		$oplist .= "this.$option = '$options->{$option}';";
 	}		
 	return "onMouseOver=\"$oplist return escape( $tip );\"";
 }
@@ -320,7 +320,13 @@ sub displaytable
 
 	if (ref($filename) eq "ARRAY") {
 		foreach $line (@$filename) {
-			my @cols = ( $position++, (split / /, $line) );
+			my @cols;
+			if ($line =~ /\|/) {
+				@cols = ( $position++, (split /\|/, $line) );
+			}
+			else {
+				@cols = ( $position++, (split / /, $line) );
+			}
 			push @lines, \@cols;
 		}
 	}

@@ -8,6 +8,7 @@
  * filename: main.c
  * Contains main entry point, and misc functions. */
 
+#include <unistd.h>
 #include "install.h"
 
 #define CDROM_INSTALL 0
@@ -76,7 +77,7 @@ int main(int argc, char *argv[])
 
 	if (!(hkernelcmdline = fopen("/proc/cmdline", "r")))
 		return 0;
-	fgets(kernelcmdline, STRING_SIZE - 1, hkernelcmdline);
+	fgets(kernelcmdline, STRING_SIZE, hkernelcmdline);
 	fclose(hkernelcmdline);
 	
 	if (strstr(kernelcmdline, "trimbigdisk"))
@@ -88,10 +89,10 @@ int main(int argc, char *argv[])
 	ctr = english_tr;
 	strcpy(shortlangname, "en");
 
-	newtDrawRootText(0, 0, "Smoothwall " PRODUCT_NAME PRODUCT_EXTRA " (" PRODUCT_ARCH ") -- http://smoothwall.org/");
+	newtDrawRootText(0, 0, TITLE " -- http://smoothwall.org/");
 	newtPushHelpLine(ctr[TR_HELPLINE]);
 
-	newtWinMessage(TITLE, ctr[TR_OK], ctr[TR_WELCOME]);
+	newtWinMessage(ctr[TR_BASIC], ctr[TR_OK], ctr[TR_WELCOME]);
 	
 	/* Get device letter for the IDE HD.  This has to succeed. */
 	if (!(findharddiskorcdrom(&hd, DISK_HD)))
@@ -115,13 +116,13 @@ int main(int argc, char *argv[])
 
 		/* Try to mount /cdrom in a loop. */
 		cdmounted = 0;
-		snprintf(commandstring, STRING_SIZE, "/bin/mount %s /cdrom", insertdevnode);
+		snprintf(commandstring, STRING_SIZE, "/bin/mount %s /cdrom -o ro", insertdevnode);
 		while (!cdmounted)
 		{
 			if (!(mysystem(commandstring))) {
 				cdmounted = 1;
 			} else {
-				rc = newtWinChoice(TITLE, ctr[TR_OK], ctr[TR_CANCEL], insertmessage);
+				rc = newtWinChoice(ctr[TR_BASIC], ctr[TR_OK], ctr[TR_CANCEL], insertmessage);
 				if (rc != 1)
 				{
 					errorbox(ctr[TR_INSTALLATION_CANCELED]);
@@ -141,7 +142,7 @@ int main(int argc, char *argv[])
 		goto EXIT;
 	}
 
-	rc = newtWinChoice(TITLE, ctr[TR_OK], ctr[TR_CANCEL],
+	rc = newtWinChoice(ctr[TR_BASIC], ctr[TR_OK], ctr[TR_CANCEL],
 		ctr[TR_PREPARE_HARDDISK], hd.devnode);
 	if (rc != 1)
 		goto EXIT;
@@ -181,13 +182,13 @@ int main(int argc, char *argv[])
 	
 	boot_partition = 200; /* in MiB */
 
-	// '-4' for 1 MiB at each and and 2MiB bios_grub partition (for Grub2 someday).
+	// '-4' for 1 MiB at each end and 2MiB bios_grub partition (for Grub2 someday).
 	current_free = maximum_free - boot_partition - 4;
 
 	// Swap size should never need to be larger than 1/8 of the disk. It could probably
 	// be fixed at 512MiB.
 	if (ramsize > maximum_free/8)
-		swap_partition = maximum_free/8;
+		swap_partition = maximum_free/8 > 1024 ? 1024 : maximum_free/8;
 	else
 		swap_partition = ramsize < 256 ? 256 : ramsize; /* in MiB */
 	current_free -= swap_partition;
@@ -201,35 +202,27 @@ int main(int argc, char *argv[])
 	fprintf(flog, "boot = %d, swap = %d, log = %d, root = %d\n",
 		boot_partition, swap_partition, log_partition, root_partition);
 
-	// To clear the existing partitions and udev
-	Fpartitions = fopen("/tmp/clear-partitions", "w");
-	fprintf(Fpartitions, "unit MiB\n");
-	fprintf(Fpartitions, "select %s\n", hd.devnode);
-	fprintf(Fpartitions, "mklabel gpt\n");
-	fprintf(Fpartitions, "quit\n");
-	fclose (Fpartitions);
-
 	// To make the partitions
 	Fpartitions = fopen("/tmp/partitions", "w");
 	fprintf(Fpartitions, "unit MiB\n");
 	fprintf(Fpartitions, "select %s\n", hd.devnode);
 	fprintf(Fpartitions, "mklabel gpt\n");
 	partStart = 3;
-	fprintf(Fpartitions, "mkpart boot ext3 %d %d\n", partStart, partStart+boot_partition-1);
+	fprintf(Fpartitions, "mkpart boot ext4 %d %d\n", partStart, partStart+boot_partition);
 	fprintf(Fpartitions, "name 1 \"/boot\"\n");
 	fprintf(Fpartitions, "toggle 1 boot\n");
 	partStart += boot_partition;
-	fprintf(Fpartitions, "mkpart swap linux-swap %d %d\n", partStart, partStart+swap_partition-1);
+	fprintf(Fpartitions, "mkpart swap linux-swap %d %d\n", partStart, partStart+swap_partition);
 	fprintf(Fpartitions, "name 2 swap\n");
 	partStart += swap_partition;
-	fprintf(Fpartitions, "mkpart log ext3 %d %d\n", partStart, partStart+log_partition-1);
+	fprintf(Fpartitions, "mkpart log ext4 %d %d\n", partStart, partStart+log_partition);
 	fprintf(Fpartitions, "name 3 \"/var/log\"\n");
 	partStart += log_partition;
-	fprintf(Fpartitions, "mkpart root ext3 %d %d\n", partStart, partStart+root_partition-1);
+	fprintf(Fpartitions, "mkpart root ext4 %d %d\n", partStart, partStart+root_partition);
 	fprintf(Fpartitions, "name 4 \"/\"\n");
-	// Partition 5 is for UEFI.
-	// fprintf(Fpartitions, "mkpart bios_grub 1 2\n");
-	// fprintf(Fpartitions, "name 5 \"bios_grub\"\n");
+	// Someday, these will be added to handle UEFI
+	//fprintf(Fpartitions, "mkpart bios_grub 1 2\n");
+	//fprintf(Fpartitions, "name 5 \"bios_grub\"\n");
 	fprintf(Fpartitions, "print\n");
 	fprintf(Fpartitions, "quit\n");
 	fclose (Fpartitions);
@@ -330,7 +323,7 @@ int main(int argc, char *argv[])
 	snprintf(commandstring, STRING_SIZE, 
 		"/bin/tar -C /harddisk -zxvf %s",
 		tarballfilename);
-	if (runcommandwithprogress(45, 4, TITLE, commandstring, tarballFileCount,
+	if (runcommandwithprogress(45, 4, ctr[TR_BASIC], commandstring, tarballFileCount,
 		ctr[TR_INSTALLING_FILES]))
 	{
 		errorbox(ctr[TR_UNABLE_TO_INSTALL_FILES]);
@@ -441,7 +434,7 @@ EXIT:
 	fclose(flog);
 
 	if (!(allok))
-		newtWinMessage(TITLE, ctr[TR_OK], ctr[TR_PRESS_OK_TO_REBOOT]);	
+		newtWinMessage(ctr[TR_BASIC], ctr[TR_OK], ctr[TR_PRESS_OK_TO_REBOOT]);	
 	
 	newtFinished();
 	
@@ -449,7 +442,7 @@ EXIT:
 
 	if (allok)
 	{
-		if (system("/bin/chroot /harddisk /usr/sbin/setup /dev/tty2 INSTALL"))
+		if (system("/bin/chroot /harddisk /usr/sbin/setup /dev/tty2 firstInstall"))
 			printf("Unable to run setup.\n");
 	}
 	
@@ -462,29 +455,36 @@ static int partitiondisk(char *diskdevnode)
 	int start = 1; int end = 0;
 	char commandstring[STRING_SIZE];
 	
-	memset(commandstring, 0, STRING_SIZE);
 	// Be sure the partition table is cleared.
-	snprintf(commandstring, STRING_SIZE - 1, "/bin/dd if=/dev/zero of=%s bs=512 count=34", diskdevnode);
-	mysystem(commandstring);
-	
-	// Clear the existing partitions and /dev nodes, and wait for udev
 	memset(commandstring, 0, STRING_SIZE);
-	snprintf(commandstring, STRING_SIZE - 1, "/usr/sbin/parted %s </tmp/clear-partitions", diskdevnode);
-	usleep(250000);
-
-	// Clear it again
-	snprintf(commandstring, STRING_SIZE - 1, "/bin/dd if=/dev/zero of=%s bs=512 count=34", diskdevnode);
+	snprintf(commandstring, STRING_SIZE, "/bin/dd if=/dev/zero of=%s bs=1024 count=1", diskdevnode);
+	mysystem(commandstring);
+	usleep(500000);
+	memset(commandstring, 0, STRING_SIZE);
+	snprintf(commandstring, STRING_SIZE, "/bin/echo \"change\" > /sys/block/%s/uevent", diskdevnode+5);
 	mysystem(commandstring);
 	
+	// Wait for udev to handle the deleted partitions, if any
+	memset(commandstring, 0, STRING_SIZE);
+	snprintf(commandstring, STRING_SIZE, "/sbin/udevadm settle");
+	mysystem(commandstring);
+
 	// Now partition in one swell foop.
 	memset(commandstring, 0, STRING_SIZE);
-	snprintf(commandstring, STRING_SIZE - 1, "/usr/sbin/parted %s </tmp/partitions", diskdevnode);
+	snprintf(commandstring, STRING_SIZE, "/usr/sbin/parted %s </tmp/partitions", diskdevnode);
 	if (runcommandwithstatus(commandstring, ctr[TR_PARTITIONING_DISK]))
 	{
 		return 1;
 	}
+	usleep(500000);
 	
-	sleep(2);
+	// Wait for udev to handle the new partitions
+	memset(commandstring, 0, STRING_SIZE);
+	snprintf(commandstring, STRING_SIZE, "/bin/echo \"change\" > /sys/block/%s/uevent", diskdevnode+5);
+	mysystem(commandstring);
+	memset(commandstring, 0, STRING_SIZE);
+	snprintf(commandstring, STRING_SIZE, "/sbin/udevadm settle");
+	mysystem(commandstring);
 	
 	return 0;
 }

@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = suricata
-VERSION = 1.4
+VERSION = 3.1.1
 
 DIR = $(PACKAGE)-$(VERSION)
 
@@ -15,6 +15,7 @@ BASE_URL = http://www.openinfosecfoundation.org/download/
 
 CONFIG_OPTS += \
 	--disable-nls \
+	--disable-gccmarch-native \
 	--prefix=/usr \
 	--enable-nfqueue \
 	--sysconfdir=/etc \

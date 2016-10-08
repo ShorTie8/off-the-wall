@@ -7,16 +7,21 @@
 #
 # This code is distributed under the terms of the GPL v2.
 
+# Track pkg build times (sort-of: display the seconds since the build stage
+#   began that the pkg begins to build)
+declare -i beginTIME startTIME
 
 # function adjust()
 #   perform the specific tool chain adjustment and check to be sure it was done right
 
 function adjust()
 {
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
   if [ -e "crumbs/${BUILD_PHASE}.adjusted" ]; then
-    echo "    (${BUILD_PHASE}) adjustment already made" >>${BUILD_OUT}
+    echo "    $displayTIME (${BUILD_PHASE}) adjustment already made" >>${BUILD_OUT}
   else
-    echo "    adjusting tool chain, ${BUILD_PHASE}" >>${BUILD_OUT}
+    echo "    $displayTIME adjusting tool chain, ${BUILD_PHASE}" >>${BUILD_OUT}
     ( docommand "adjusting stage $1" "bash toolcrib/stage$1_tc_adjustment") \
           > crumbs/${BUILD_PHASE}.adjusting.out 2>&1
     status=$?
@@ -43,12 +48,17 @@ function build()
     TGT=""
     TGTP=""
   fi
+  VERSION=`make --no-print-directory -C sources/$1 show_version 2>&1`
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
   if [ -e "sources/$1/$BUILD_PHASE$TGT.built" ]; then
-    echo "    $1$TGTP already built" >>${BUILD_OUT}
+    echo "    $displayTIME $1$TGTP ($VERSION) already built" >>${BUILD_OUT}
   else
-    echo "    $1$TGTP: PKG_ROOT:$PKG_ROOT" >>${BUILD_OUT}
+    if [ -p crumbs/monpipe ]; then echo "-f $1" > crumbs/monpipe; fi
+    echo "    $displayTIME $1$TGTP ($VERSION): PKG_ROOT:$PKG_ROOT" >>${BUILD_OUT}
     ( docommand "$1::$2" "make -C sources/$1 $2") > sources/$1/$BUILD_PHASE$TGT.out 2>&1
     status=$?
+    if [ -p crumbs/monpipe ]; then echo > crumbs/monpipe; fi
     if [ $status -eq 0 ]; then
       touch sources/$1/$BUILD_PHASE$TGT.built
     else
@@ -63,12 +73,17 @@ function build()
 
 function buildenv()
 {
+  VERSION=`make --no-print-directory -C sources/$1 show_version 2>&1`
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
   if [ -e "sources/$1/$BUILD_PHASE.built" ]; then
-    echo "    $1 already built" >>${BUILD_OUT}
+    echo "    $displayTIME $1 ($VERSION) already built" >>${BUILD_OUT}
   else
-    echo "    $1"
+    if [ -p crumbs/monpipe ]; then echo "-${BUILD_PHASE/Stage_/} $1" > crumbs/monpipe; fi
+    echo "    $displayTIME $1 ($VERSION) "
     ( docommand "$1" "make -C sources/$1 clean install") > sources/$1/$BUILD_PHASE.out 2>&1
     status=$?
+    if [ -p crumbs/monpipe ]; then echo > crumbs/monpipe; fi
     if [ $status -eq 0 ]; then
       touch sources/$1/$BUILD_PHASE.built
     else
@@ -86,10 +101,14 @@ function build_tc_stage_1() {
   set_build_environment
 
   export JOBS=$JOBS_MP 
+  beginTIME=`date +%s`
   buildenv binutils 1
   buildenv gcc 1
   buildenv kernel-headers 1
   buildenv glibc 1
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
+  echo "    $displayTIME $BUILD_PHASE build complete"
   #exit 111
 }
 
@@ -102,9 +121,13 @@ function build_tc_stage_2() {
   set_build_environment
 
   export JOBS=$JOBS_MP
+  beginTIME=`date +%s`
   buildenv binutils 2
   buildenv gcc 2
   check 2 gcc
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
+  echo "    $displayTIME $BUILD_PHASE build complete"
   #exit 222
 }
 
@@ -117,6 +140,7 @@ function build_tc_stage_3() {
   set_build_environment
 
   export JOBS=$JOBS_MP
+  beginTIME=`date +%s`
   buildenv tcl 1
   buildenv expect 1
   buildenv dejagnu 1
@@ -148,6 +172,10 @@ function build_tc_stage_3() {
   buildenv texinfo 1
   buildenv util-linux 1
   buildenv wget 1
+  buildenv git 1
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
+  echo "    $displayTIME $BUILD_PHASE build complete"
 }
 
 
@@ -156,10 +184,12 @@ function build_tc_stage_3() {
 
 function check()
 {
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
   if [ -e "crumbs/${BUILD_PHASE}_${2}.checked" ]; then
-    echo "    ${BUILD_PHASE} $2 already checked" >>${BUILD_OUT}
+    echo "    $displayTIME ${BUILD_PHASE} $2 already checked" >>${BUILD_OUT}
   else
-      echo "    checking tool chain, ${BUILD_PHASE}" >>${BUILD_OUT}
+      echo "    $displayTIME checking tool chain, ${BUILD_PHASE}" >>${BUILD_OUT}
       ( docommand "checking ${BUILD_PHASE} ${2}" "bash toolcrib/stage${1}_${2}_check") \
             > crumbs/${BUILD_PHASE}_${2}_check.out 2>&1
     status=$?
@@ -237,14 +267,16 @@ function mso () {
 
 other_cmd()
 {
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
   if [ -e "$1" ]; then
-    echo "    $2 already done"
+    echo "    $displayTIME $2 already done"
   else
     if [ "$BUILD_PHASE" == "Final" ]; then
       export PKG_ROOT="$PKG_ROOT_PATH/other"
-      echo "    $2: PKG_ROOT:$PKG_ROOT"
+      echo "    $displayTIME $2: PKG_ROOT:$PKG_ROOT"
     else
-      echo "    $2"
+      echo "    $displayTIME $2"
     fi
     ( docommand "$2" "$3") > "$4" 2>&1
     

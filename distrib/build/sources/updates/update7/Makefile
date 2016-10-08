@@ -6,19 +6,15 @@ UPDATE_PACKAGES = \
 		  openntpd \
 		  httpd \
 		  findutils \
+		  dhcp \
 		  dhcpcd \
 		  miniupnpd \
 		  clamav \
 		  subversion \
 		  neon \
 		  smoothd \
+		  snort \
 		  squid \
-		  linux \
-		  ipset \
-		  xtables-addons \
-		  openswan \
-		  ipbatch \
-		  linux-firmware \
 		  kernel-drivers \
 		  coretree
 
@@ -28,7 +24,18 @@ UPDATE_NAME = Update7
 
 EXTRA_UPDATE_FILES = patch-apache-conf.sh
 
-KERNEL = yes
 CLAMAV = yes
 
 include ../Makefile.update
+
+
+
+# Put off until Upd8.
+#		  linux \
+#		  ipset \
+#		  xtables-addons \
+#		  openswan \
+#		  ipbatch \
+#		  linux-firmware \
+#
+#KERNEL = yes

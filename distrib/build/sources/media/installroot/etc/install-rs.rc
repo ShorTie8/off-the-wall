@@ -112,11 +112,10 @@ function EXITTRAP {
 }
 
 echo -e "${BOUL}Wait for udev to settle${NO}"
-while [ -e /tmp/trigger-lock ]; do
-  usleep 100000
-done
+/sbin/udevadm hwdb --update
+/sbin/udevadm settle
 
-typeset -i i tries
+typeset -i tries WORK_IDX
 tries=0
 WORKING[0]="|"
 WORKING[1]="/"
@@ -135,14 +134,20 @@ while [ ! -e ${PersistentNetRule} ]; do
 
   usleep 100000
   tries=tries+1
-  if [ $i -gt 60 ]; then touch ${PersistentNetRule}; fi
+  if [ $tries -gt 60 ]; then touch ${PersistentNetRule}; fi
 done
-unset i tries
+unset tries WORK_IDX
 
 # Sort and rename NICs
 . /etc/eth-addr-sort
 
 sleep 2
+
+# Load FSen
+for i in ext2 vfat isofs udf; do
+  modprobe $i&
+done
+wait >/dev/null 2>&1
 
 echo "1 4 1 7" >/proc/sys/kernel/printk
 
@@ -158,7 +163,7 @@ echo "Configuring installer"
 #   at least to re-assign the NICs. In the case of dev testing, much may
 #   need changing to avoid conflicting with another active system.
 mustRunSetup=0
-autoSetup=" INSTALL"
+autoSetup=" firstInstall"
 
 echo "Executing installer"
 . /etc/exec-install.rc

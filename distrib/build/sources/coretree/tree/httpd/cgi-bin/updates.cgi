@@ -7,7 +7,6 @@
 # (c) The SmoothWall Team
 
 use IO::Socket;
-use strict;
 
 use lib "/usr/lib/smoothwall";
 use header qw( :standard );
@@ -24,7 +23,7 @@ use warnings;
 my (%uploadsettings, %updates);
 
 $uploadsettings{'ACTION'} = '';
-my $errormessage = '';
+our $errormessage = '';
 
 &getcgihash(\%uploadsettings);
 
@@ -52,7 +51,7 @@ if ($uploadsettings{'ACTION'} eq $tr{'upload'}) {
 	my $return = &downloadlist();
 	if ($return =~ m/^200 OK/) {
 		unless (open(LIST, ">${swroot}/patches/available")) {
-			$errormessage = $tr{'could not open available updates file'};
+			$errormessage .= $tr{'could not open available updates file'} ."<br />";
 			goto ERROR;
 		}
 		flock LIST, 2;
@@ -63,19 +62,19 @@ if ($uploadsettings{'ACTION'} eq $tr{'upload'}) {
 	} 
 	else {
 		unless(open(LIST, "${swroot}/patches/available")) {
-			$errormessage = $tr{'could not open available updates list'};
+			$errormessage .= $tr{'could not open available updates list'} ."<br />";
 			goto ERROR;
 		}
 		@list = <LIST>;
 		close(LIST);
-		$errormessage = $tr{'could not download the available updates list'};
+		$errormessage .= $tr{'could not download the available updates list'} ."<br />";
 	}
 	unless (mkdir("/var/patches/$$",0700)) {
-		$errormessage = $tr{'could not create directory'};
+		$errormessage .= $tr{'could not create directory'} ."<br />";
 		goto ERROR;
 	}
 	unless (open(FH, ">/var/patches/$$/patch.tar.gz")) {
-		$errormessage = $tr{'could not open update for writing'};
+		$errormessage .= $tr{'could not open update for writing'} ."<br />";
 		goto ERROR;
 	}
 	flock FH, 2;
@@ -95,25 +94,25 @@ if ($uploadsettings{'ACTION'} eq $tr{'upload'}) {
 		}
 	}
 	unless ($found == 1) {
-		$errormessage = $tr{'this is not an authorised update'};
+		$errormessage .= $tr{'this is not an authorised update'} ."<br />";
 		goto ERROR;
 	}
 	unless (system("cd /var/patches/$$ && /usr/bin/tar xvfz patch.tar.gz > /dev/null") == 0) {
-		$errormessage = $tr{'this is not a valid archive'};
+		$errormessage .= $tr{'this is not a valid archive'} ."<br />";
 		goto ERROR;
 	}
 	unless (open(INFO, "/var/patches/$$/information")) {
-		$errormessage = $tr{'could not open update information file'};
+		$errormessage .= $tr{'could not open update information file' ."<br />"};
 		goto ERROR;
 	}
 	my $info = <INFO>;
 	close(INFO);
 
-	open(INS, "${swroot}/patches/installed") or $errormessage = $tr{'could not open installed updates file'};
+	open(INS, "${swroot}/patches/installed") or $errormessage .= $tr{'could not open installed updates file'} ."<br />";
 	while (<INS>) {
 		my @temp = split(/\|/,$_);
 		if($info =~ m/^$temp[0]/) {
-			$errormessage = $tr{'this update is already installed'};
+			$errormessage .= $tr{'this update is already installed'} ."<br />";
 			goto ERROR;
 		}
 	}
@@ -121,11 +120,11 @@ if ($uploadsettings{'ACTION'} eq $tr{'upload'}) {
 	print STDERR "Going for installation attempt\n";
 
 	if (system( '/usr/bin/setuids/installpackage', $$)) {
-		$errormessage = $tr{'package failed to install'};
+		$errormessage .= $tr{'package failed to install'} ."<br />";
 		goto ERROR;
 	}
 	unless (open(IS, ">>${swroot}/patches/installed")) {
- 		$errormessage = $tr{'update installed but'};
+ 		$errormessage .= $tr{'update installed but'} ."<br />";
 	}
 	flock IS, 2;
 	my @time = gmtime();
@@ -144,7 +143,7 @@ elsif ($uploadsettings{'ACTION'} eq $tr{'refresh update list'}) {
 	my $return = &downloadlist();
 	if ($return =~ m/^200 OK/) {
 		unless(open(LIST, ">${swroot}/patches/available")) {
-			$errormessage = $tr{'could not open available updates file'};
+			$errormessage .= $tr{'could not open available updates file'} ."<br />";
 			goto ERROR;
 		}
 		flock LIST, 2;
@@ -155,13 +154,13 @@ elsif ($uploadsettings{'ACTION'} eq $tr{'refresh update list'}) {
 		&log($tr{'successfully refreshed updates list'});
 	} 
 	else {
-		$errormessage = $tr{'could not download the available updates list'};
+		$errormessage .= $tr{'could not download the available updates list'} ."<br />";
 	}
 }
 
 ERROR:
 
-open(AV, "${swroot}/patches/available") or $errormessage = $tr{'could not open the available updates file'};
+open(AV, "${swroot}/patches/available") or $errormessage .= $tr{'could not open the available updates file'} ."<br />";
 while (<AV>) {
 	next if $_ =~ m/^#/;
 	chomp $_;
@@ -171,7 +170,7 @@ while (<AV>) {
 }
 close (AV);
 
-open (PF, "${swroot}/patches/installed") or $errormessage = $tr{'could not open installed updates file'};
+open (PF, "${swroot}/patches/installed") or $errormessage .= $tr{'could not open installed updates file'} ."<br />";
 while (<PF>) {
 	my @temp = split(/\|/,$_);
 	$updates{$temp[0]}{'installed'} = "---";
@@ -250,7 +249,7 @@ END
 foreach my $update ( sort keys %updates ) {
 	next if ( not defined $updates{$update}{'installed'} );
 	$updates{$update}{'name'} = "update?-???" if ($updates{$update}{'name'} eq "");
-	$updates{$update}{'summary'} = "Update summary not found; are you testing?" if ($updates{$update}{'summary'} eq "");
+	$updates{$update}{'summary'} = "Update summary not found; the patch list wasn't retrieved or you are testing." if ($updates{$update}{'summary'} eq "");
 	$updates{$update}{'description'} = "Update description not found." if ($updates{$update}{'description'} eq "");
 	print <<END
 <tr>
@@ -358,7 +357,7 @@ END
 if ($uploadsettings{'ACTION'} eq "$tr{'update'}" ) {
 	use lib "/usr/lib/smoothwall/";
 
-	print STDERR "Performing Update\n";
+	&progressReport ( "Performing Update" );
 
 	# determine the list of updates we currently require.
 
@@ -371,22 +370,6 @@ if ($uploadsettings{'ACTION'} eq "$tr{'update'}" ) {
 
 	# Get the # of updates to fetch
 	my $updatesNeeded = scalar(keys %required);
-<<<<<<< HEAD
-	if ( $updatesNeeded == 0 ){
-		print <<END
-<script>
-	document.getElementById('status').innerHTML = "All updates installed";
-</script>
-END
-;		
-	} else {
-		my $status = "System requires ".$updatesNeeded." update(s)";
-		print STDERR "System requires ".$updatesNeeded." update(s)\n";
-
-		print <<END
-<script>
-	document.getElementById('status').innerHTML = "$status";
-=======
 	if ( $updatesNeeded == 0 ) {
 		&progressReport ( "All updates installed" );
 	}
@@ -395,21 +378,16 @@ END
 
 		print <<END
 <script type="text/javascript">
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 	document.getElementById('progress').style.width = '1px';
 	document.getElementById('progress').style.background = '#a0a0ff';
 </script>
 END
-<<<<<<< HEAD
-;		
-=======
 ;
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 
-		# the progress bar is 600pixels wide
+		# the progress bar is 380pixels wide
 		# hence we need the following bits of information.
 
-		my $width_per_update = ( 600 / ($updatesNeeded) );
+		my $width_per_update = ( 380 / ($updatesNeeded) );
 		my $complete = 0;
 
 		sub update
@@ -427,20 +405,6 @@ END
 		}
 	
 		my $error;
-<<<<<<< HEAD
-
-		# Fetch each in turn
-		foreach my $req ( sort keys %required ){
-			print STDERR "Download update #$req ($required{$req}{'name'})\n";
-			$status = "Download update #$req ($required{$req}{'name'})";
-
-			print <<END
-<script>
-	document.getElementById('status').innerHTML = "$status";
-</script>
-END
-;
-=======
 		my $filename;
 		my $req;
 
@@ -448,12 +412,12 @@ END
 		foreach my $req ( sort keys %required ) {
 			&progressReport ( "Download update #$req ($required{$req}{'name'})" );
 			&usleep ( 250000 );
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 
 			my ( $down, $percent, $speed );
 		
 			my $uri = "http://downloads.smoothwall.org/updates/3.1/";
-			my $filename = "3.1-$required{$req}{'name'}.tar.gz";
+			$filename = "3.1-$required{$req}{'name'}.tar.gz";
+			&progressReport ("updatename='$filename'");
 	
 			# Start the DL in the background, logging to /var/patches/pending/*.log
 			&download( $uri, $filename );
@@ -464,33 +428,17 @@ END
 			do { 
 				# Get wget's progress
 				( $down, $percent, $speed, $required{$req}{'file'} ) = &progress( $filename );
+				$percent =~ s/\%//;
 
 				my $distance = ( $complete * $width_per_update ) + int( ( $width_per_update / 100 ) * $percent );
 				$distance = 1 if ( $distance <= 0 );
 
 				print <<END
-<<<<<<< HEAD
-<script>
-=======
 <script type="text/javascript">
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 	document.getElementById('progress').style.width = '${distance}px';
 </script>
 END
 ;
-<<<<<<< HEAD
-
-				if ( $percent eq "100%" ){
-					$stop = 1;
-				} elsif( not defined $percent or $percent eq "" ){
-					$stop = -1;
-				} else {
-					$stop = 0;
-				}
-				
-				sleep( .25 ); 
-			} while ( $stop == 0 );
-=======
 				print STDERR "$filename ${percent}% complete\n";
 
 				if ( $percent eq "100" ) {
@@ -507,66 +455,25 @@ END
 				&usleep ( 100000 ); 
 			}
 			while ( $stop == 0 );
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 
 			# Get wget's final progress
 			( $down, $percent, $speed, $required{$req}->{'file'} ) = &progress( $filename );
-			print STDERR "Update #$req fetched ($percent):\n    $required{$req}->{'md5'}\n    ($required{$req}->{'size'})\n$required{$req}->{'file'}\n";
+			&progressReport ( "Update #$req fetched ($percent):\n    $required{$req}->{'md5'}\n    ($required{$req}->{'size'})\n$required{$req}->{'file'}\n" );
 
 			# Bump completed count
 			$complete++;
 			my $comp = $width_per_update * $complete; 
 
 			print <<END
-<<<<<<< HEAD
-<script>
-=======
 <script type="text/javascript">
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 	document.getElementById('progress').style.width = '${comp}px';
 </script>
 END
 ;
-<<<<<<< HEAD
-
-=======
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 		}
 
-		print STDERR "$complete of $updatesNeeded fetched\n";
+		&progressReport ( "$complete of $updatesNeeded fetched" );
 
-<<<<<<< HEAD
-		if ( $error eq "" ){
-			foreach my $req ( sort keys %required ){
-				$status = "Installing update $req";
-				print <<END
-<script>
-	document.getElementById('status').innerHTML = "$status";
-</script>
-END
-;
-				use Data::Dumper;
-				print STDERR Dumper $required{$req};
-			 	my $worked = apply( $required{$req}->{'file'} );
-
-				if ( not defined $worked ){
-					print <<END
-<script>
-	document.getElementById('status').innerHTML = "$errormessage";
-</script>
-END
-;
-					$error = $errormessage;
-					last;
-				} 
-			}
-		}
-
-		if ( $error ne "" ){
-			print <<END
-<script>
-	document.getElementById('status').innerHTML = "One or more updates failed to install - upgrade aborted";
-=======
 		foreach $req ( sort keys %required ) {
 			&progressReport ( "Installing update $req" );
 
@@ -585,18 +492,10 @@ END
 
 			print <<END
 <script type="text/javascript">
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 	document.getElementById('progress').style.width = '1px';
 	document.getElementById('progress').style.background = 'none';
 </script>
 END
-<<<<<<< HEAD
-;	
-		} else {
-			print <<END
-<script>
-	document.getElementById('status').innerHTML = "Updates Installed";
-=======
 ;
 		}
 		else {
@@ -604,21 +503,20 @@ END
 
 			print <<END
 <script type="text/javascript">
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 	document.getElementById('progress').style.background = 'none';
 	document.location = "/cgi-bin/updates.cgi";
 </script>
 END
-<<<<<<< HEAD
-;	
-=======
 ;
 
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 		}		
 	}
 
 }
+
+# Label used to short-circuit operation when not all needed updates are downloaded.
+# This ensures that the HTML is properly 'closed'.
+CLOSEHTML:
 
 print <<END
 </body>
@@ -632,35 +530,21 @@ sub apply
 	my ( $f ) = @_;
 	print STDERR "Applying Patch $f\n";
 	
-<<<<<<< HEAD
-	unless (mkdir("/var/patches/$$",0700))
-	{
-		$errormessage = $tr{'could not create directory'};
-		print STDERR "returning $errormessage\n";
-		tidy();
-		return undef;
-	}
-	unless (open(FH, ">/var/patches/$$/patch.tar.gz"))
-	{
-		$errormessage = $tr{'could not open update for writing'};
-		print STDERR "returning $errormessage\n";
-=======
 	unless (mkdir("/var/patches/$$",0700)) {
-		$errormessage = $tr{'could not create directory'} +"/var/patches/$$";
+		$errormessage .= $tr{'could not create directory'} +"/var/patches/$$<br />";
 		&progressReport ( "apply() failed: $errormessage" );
 		tidy();
 		return undef;
 	}
 
 	unless (open(FH, ">/var/patches/$$/patch.tar.gz")) {
-		$errormessage = $tr{'could not open update for writing'} +"/var/patches/$$/patch.tar.gz";
+		$errormessage .= $tr{'could not open update for writing'} +"/var/patches/$$/patch.tar.gz<br />";
 		&progressReport ( "apply() failed: $errormessage" );
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 		tidy();
 		return undef;
 	}
 
-	print STDERR "Writing /var/patches/$$/patch.tar.gz\n";
+	&progressReport ( "apply(): writing /var/patches/$$/patch.tar.gz" );
 	
 	if ( defined $f ) {
 		use File::Copy;
@@ -674,22 +558,19 @@ sub apply
 
 	my $md5sum;
 	chomp($md5sum = `/usr/bin/md5sum /var/patches/$$/patch.tar.gz`);
-<<<<<<< HEAD
-=======
 	if ($md5sum eq "d41d8cd98f00b204e9800998ecf8427e") {
-		$errormessage = "patch.tar.gz is empty?!? (MD5 sum = d41d8...8427e)";
+		$errormessage .= "patch.tar.gz is empty?!? (MD5 sum = d41d8...8427e)<br />";
 		&progressReport ( "apply() failed: $errormessage" );
 		tidy();
 		return undef;
 	}
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 	my $found = 0;
 	my ($id,$md5,$title,$description,$date,$url);
-	print STDERR "looking for md5\n";
+	&progressReport ( "apply(): looking for md5" );
 
 	unless(open(LIST, "${swroot}/patches/available")) {
-		$errormessage = $tr{'could not open available updates list'};
-		print STDERR "returning $errormessage\n";
+		$errormessage .= $tr{'could not open available updates list'} ."<br />";
+		&progressReport ( "apply() failed: $errormessage" );
 		tidy();
 		return undef;
 	}
@@ -699,34 +580,16 @@ sub apply
 	foreach (@list) {
 		chomp();
 		($id,$md5,$title,$description,$date,$url) = split(/\|/,$_);
-<<<<<<< HEAD
-print STDERR "Checking MD5 Sum for $f $md5sum against $md5 ($title)\n";
-		if ($md5sum =~ m/^$md5\s/)
-		{
-=======
 		&progressReport ( "apply(): compare MD5 Sum of $f ($md5sum) against $title ($md5)" );
 
 		if ($md5sum =~ m/^$md5\s/) {
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 			$found = 1;
 			last;
 		}
+		&usleep ( 500000 );
 	}
-<<<<<<< HEAD
-print STDERR "Checking Authority\n";
-	unless ($found == 1)
-	{
-		$errormessage = $tr{'this is not an authorised update'};
-		print STDERR "$md5 $errormessage";
-		tidy();
-		return undef;
-	}
-print STDERR "Attempting Tar Operation\n";
-	unless (system("/usr/bin/tar", "xfz", "/var/patches/$$/patch.tar.gz", "-C", "/var/patches/$$") == 0)
-	{
-=======
 	unless ($found == 1) {
-		$errormessage = $tr{'this is not an authorised update'} +"; the md5sums do not match";;
+		$errormessage .= $tr{'this is not an authorised update'} +"; the md5sums do not match<br />";
 		&progressReport ( "apply(): $md5 $errormessage" );
 		tidy();
 		return undef;
@@ -734,80 +597,59 @@ print STDERR "Attempting Tar Operation\n";
 	&progressReport ( "apply(): unpack patch tarball..." );
 
 	unless (system("/usr/bin/tar", "xfz", "/var/patches/$$/patch.tar.gz", "-C", "/var/patches/$$") == 0) {
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
-		$errormessage = $tr{'this is not a valid archive'};
-		print STDERR "$errormessage";
+		$errormessage .= $tr{'this is not a valid archive'} ."<br />";
+		&progressReport ( "apply() failed: $errormessage" );
 		tidy();
 		return undef;
 	}
-<<<<<<< HEAD
-print STDERR "Attempting to extract information file\n";
-	unless (open(INFO, "/var/patches/$$/information"))
-	{
-=======
 	&progressReport ( "apply(): get information file..." );
 
 	unless (open(INFO, "/var/patches/$$/information")) {
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
-		$errormessage = $tr{'could not open update information file'};
-		print STDERR $errormessage;
+		$errormessage .= $tr{'could not open update information file'} ."<br />";
+		&progressReport ( "apply() failed: $errormessage" );
 		tidy();
 		return undef;
 	}
 	my $info = <INFO>;
 	close(INFO);
-<<<<<<< HEAD
-print STDERR "Checking status of installed updates\n";
-	open(INS, "${swroot}/patches/installed") or $errormessage = $tr{'could not open installed updates file'};
-	while (<INS>)
-	{
-=======
 
 	&progressReport ("apply(): already installed?");
 
 	unless (open(INS, "${swroot}/patches/installed")) {
-		$errormessage = $tr{'could not open installed updates file'};
+		$errormessage .= $tr{'could not open installed updates file'} ."<br />";
 		&progressReport ( "apply() failed: $errormessage" );
 		tidy();
 		return undef;
 	}
 
 	while (<INS>) {
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 		my @temp = split(/\|/,$_);
 		if($info =~ m/^$temp[0]/) {
-			$errormessage = $tr{'this update is already installed'};
-			print STDERR $errormessage;
+			$errormessage .= $tr{'this update is already installed'} ."<br />";
+			&progressReport ( "apply() failed: $errormessage" );
 			tidy();
 			return undef;
 		}
 	}
 	chdir("/var/patches/$$");
+	close(INS);
 	
-<<<<<<< HEAD
-	if (system( '/usr/bin/setuids/installpackage', $$))
-	{
-=======
 	&progressReport ("apply(): run installpackage to install the update");
 
 	if (system( '/usr/bin/setuids/installpackage', $$)) {
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
-		$errormessage = $tr{'smoothd failure'};
+		$errormessage .= $tr{'smoothd failure'} ."<br />";
+		&progressReport ( "apply() failed: $errormessage" );
 		tidy();
 		return undef;
 	}
 	
 	unless (open(IS, ">>${swroot}/patches/installed")) {
-<<<<<<< HEAD
- 		$errormessage = $tr{'update installed but'}; }
-=======
- 		$errormessage = $tr{'update installed but'};
+ 		$errormessage .= $tr{'update installed but'} ."<br />";
 		&progressReport ( "apply() failed: $errormessage" );
 		tidy();
 		return undef;
 	}
 
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 	flock IS, 2;
 	my @time = gmtime();
 	chomp($info);
@@ -816,43 +658,33 @@ print STDERR "Checking status of installed updates\n";
 	$time[3] = "0$time[3]" if ($time[3] < 10);
 	$time[4] = "0$time[4]" if ($time[4] < 10);
 	print IS "$info|$time[5]-$time[4]-$time[3]\n";
+
 	close(IS);
 	tidy();
 	
+	&progressReport ( "apply(): $title was installed" );
 	&log("$tr{'the following update was successfully installedc'} $title"); 
 }
 
+
 sub tidy
 {
-	print STDERR "Tidying up\n";
+	&progressReport ( "tidy(): tidying up" );
 
 	opendir(CUSTOM, "/var/patches/$$/");
 	my @files = readdir (CUSTOM);
 	closedir(CUSTOM);
 
-<<<<<<< HEAD
-	foreach my $file (@files)
-	{
-		print STDERR "Unlinking $file\n";
-		next if ( $file =~ /^\..*/ );
-		unlink "/var/patches/$$/$file";
-	}
-
-	print STDERR "Removing directory $$\n";
-=======
 	foreach my $file (@files) {
 		&progressReport ( "tidy(): unlinking $file" );
 		next if ( $file =~ /^\..*/ );
 		unlink "/var/patches/$$/$file";
 	}
 	&progressReport ( "tidy(): remove directory $$" );
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5
 	rmdir "/var/patches/$$";
 }
 
 
-<<<<<<< HEAD
-=======
 sub progressReport
 {
 	my ($statusStr) = @_;
@@ -865,4 +697,3 @@ END
 	print STDERR "$statusStr\n";
 	&usleep ( 250000 );
 }
->>>>>>> f57ce9f3ea6fcdfeaf84cc0d44868f10eebd2fe5

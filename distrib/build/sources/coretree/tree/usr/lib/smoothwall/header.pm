@@ -20,7 +20,7 @@ our @_validation_items;
                     showmenu showsection openpage closepage openbigbox
                     closebigbox openbox closebox alertbox pageinfo readvalue
                     writevalue writehash readhash getcgihash log pipeopen age
-                    validip validmask validipormask validipandmask validport
+                    validip validmask validipormask validipandmask validipandmasks validport validarchivename
                     validportrange validmac validhostname validcomment UTC2LocalString
                     basename dirname connectedstate %tr @_validation_items getsystemid
                     outputfile getLinkSpeed requireConditional %filters %optionText);
@@ -785,7 +785,7 @@ END
 	else {
 		print "<table class='warning'>";
 		print "<tr>";
-		print "	<td class='warningimg'><img src='/ui/img/warning.jpg' alt='$tr{'error'}'></td><td class='warning'><strong>$tr{'error'}</strong>$thisboxmessage</td>";
+		print "	<td class='warningimg'><img src='/ui/img/warning.png' alt='$tr{'error'}'></td><td class='warning'><strong>$tr{'error'}</strong>$thisboxmessage</td>";
 	}
 
 
@@ -1044,6 +1044,23 @@ sub validipormask
 	return &validmask($mask);
 }
 
+sub validipandmasks
+{
+	my @ipandmasks = split(/:/, $_[0]);
+	
+	# Assume all are OK.
+	my $combinedRetVal = 1;
+
+	# split it into individual ip/masks and validate each.
+	foreach $ipandmask (@ipandmasks) {
+		# If invalid, set to zero (not all valid).
+		$combinedRetVal = 0 if !(&validipandmask($ipandmask));
+	}
+
+	return $combinedRetVal;
+
+}
+
 sub validipandmask
 {
 	my $ipandmask = $_[0];
@@ -1124,6 +1141,19 @@ sub validhostname
 		return 0 if (length($part) > 63) ;
 		return 0 unless (($part =~ /^[A-Za-z]$/) or ($part =~ /^[A-Za-z][A-Za-z0-9-]*[A-Za-z0-9]$/));
 	}
+	return 1;
+}
+
+sub validarchivename
+{
+	my $filename = $_[0];
+	my $part;
+
+	# Sanity checks
+	# 43 bytes of template plus up to 63 bytes of simple hostname.
+	return 0 if (length($filename) > 106);
+	return 0 unless ($filename =~ /^[0-9A-Za-z._-]+$/);
+
 	return 1;
 }
 

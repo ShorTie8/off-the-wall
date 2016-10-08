@@ -9,6 +9,9 @@ include ../Makefile.versions
 include ../Makefile
 
 PACKAGE = media
+VERSION = N/A
+
+TAR_OPTIONS = 
 
 # Two dirs down, one cross each.
 ifeq ($(BUILD_OUT), crumbs/build-progress.out)
@@ -18,8 +21,8 @@ else
 endif
 
 # Make it easy to switch between the two
-export UDEV = udev
-export UDEVunused = eudev
+export UDEV = eudev
+export UDEVunused = udev
 
 # Document these pkgs, don't install.
 # Some of these are retirees.
@@ -30,33 +33,34 @@ OTHER_PKGS = updates jam $(UDEVunused) udev-config cnxadsl \
 TARGET_DIR = /build/target
 
 ADV_PKGS = gdbm GeoIP Python libmnl openldap gperf attr \
-	   subversion ntop iperf wireshark
+	   subversion ntop iperf
 KVM_PKGS = samba
 
 INST_PKGS = glibc libsmooth+setup libgcc freetype libpng libdnet \
 	    daq libnet libnetfilter_queue libnfnetlink attr libcap-ng \
+	    libnetfilter_acct libnetfilter_conntrack libnetfilter_cthelper \
+	    libnetfilter_cttimeout libnetfilter_log libnftnl \
 	    libcap fontconfig glib cairo libffi readline libpcap sqlite-autoconf \
 	    libosip2 libpcap pango zlib slang pixman libxml2 libusb-compat libusb \
+	    libevent nspr nss unbound \
 	    kmod gmp mpfr mpc popt yaml perl-mods libcap-ng rsync \
 	    newt binutils coreutils iana-etc mktemp file findutils gawk \
-	    ncurses vim less sed flex gettext net-tools inetutils iputils \
-	    whois perl bash bzip2 kbd e2fsprogs grep gzip module-init-tools \
+	    ncurses vim less sed flex gettext inetutils iputils \
+	    whois perl bash bc bzip2 kbd e2fsprogs grep gzip module-init-tools \
 	    procinfo-ng procps-ng psmisc shadow sysklogd logrotate sysvinit tar \
 	    util-linux joe wget iptables ipset ipbatch pciutils usbutils \
-	    linux$(KERNEL_TYPE) openssl openssh httpd smoothd squid freefont \
+	    linux openssl openssh httpd smoothd squid freefont \
 	    strace rrdtool cron tcpdump dnsmasq ntp openntpd hdparm hddtemp \
-	    iproute2 gd expat ethtool listtables inotify-tools bridge-utils \
+	    iproute2 gd expat ethtool listtables inotify-tools \
 	    beep2 pcre trafficstats iftop setuids ppp isdn4k-utils rp-pppoe \
 	    ibod dhcpcd eciadsl-synch_bin eciadsl-usermode dhcp snort \
 	    oinkmaster openswan wireless_tools imspector diffutils clamav \
 	    p3scan siproxd which miniupnpd ez-ipupdate noip cdrtools \
-	    smartmontools at dosfstools e2fsprogs grub linux-atm \
+	    suricata smartmontools at dosfstools e2fsprogs grub linux-atm \
 	    mtools nano reiserfsprogs parted xtables-addons cpio dialog \
 	    $(UDEV) lm_sensors xz pcmciautils qemu sysfsutils db squidGuard \
-	    apcupsd cacert-bundle setkerneltz htop curl iptraf-ng \
-	    backports kernel-drivers ruby cracklib \
-	    libgpg-error libgcrypt libksba \
-	    libassuan Linux-PAM aide sysstat \
+	    apcupsd cacert-bundle setkerneltz fping \
+	    kernel-drivers \
 	    coretree $(ADV_PKGS) device-ids
 
 # INST_PKGS notes.
@@ -225,6 +229,7 @@ endif
 	@#rm -f distrib/etc/resolv.conf
 	@find distrib -name .gitignore -exec rm -f {} \;
 	@ln -s /var/smoothwall/vpn/ipsec.conf distrib/etc/ipsec.conf
+	@ln -sf /usr/bin/hostname distrib/bin/hostname
 	@cd distrib; chown -R root:root usr/share/ntop usr/etc/ntop
 	@cd distrib/etc; mkdir -p apcupsd/scripts && chown root:root apcupsd/scripts && chmod 755 apcupsd/scripts
 	@cd distrib/etc; chmod 644 logrotate.{base,conf,d/*}
@@ -313,7 +318,7 @@ all: cdrom cdrom/smoothwall.tgz extracontent
 clean:
 	@echo -n " $(PACKAGE)"
 	@rm -f Media.mediaISO.built
-	@rm -f $(BASENAME)$(PRODUCT_EXTRA)-$(mTUPLE).img
+	@rm -f *.img
 	@rm -rf cdrom cdrom-dev offroad distrib distrib-dev distrib-doc klibc temp
 	@make --no-print-directory -C cdromboot clean >/dev/null 2>&1
 	@make --no-print-directory -C installroot clean >/dev/null 2>&1

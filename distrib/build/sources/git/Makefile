@@ -3,11 +3,11 @@
 include ../Makefile.conf
 
 PACKAGE = git
-VERSION = 1.8.1.3
+VERSION = 2.9.3
 
 EXTENSION = .tar.gz
 
-BASE_URL = http://git-core.googlecode.com/files/
+BASE_URL = https://www.kernel.org/pub/software/scm/git/
 
 CONFIG_OPTS += --with-openssl --without-tcltk --without-python
 

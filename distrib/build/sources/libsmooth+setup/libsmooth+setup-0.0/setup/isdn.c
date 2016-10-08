@@ -302,7 +302,7 @@ void handlemoduleparams(void)
 {
 	struct keyvalue *kv = initkeyvalues();
 	char moduleparams[STRING_SIZE] = "";
-	const char *values[] = { moduleparams, NULL };	/* pointers for the values. */
+	char *values[] = { moduleparams, NULL };	/* pointers for the values. */
 	struct newtWinEntry entries[] =
 		{ { "", &values[0], 0,}, { NULL, NULL, 0 } };
 	int rc;
@@ -318,7 +318,7 @@ void handlemoduleparams(void)
 
 	for (;;)
 	{	
-		rc = newtWinEntries(TITLE, ctr[TR_ENTER_ADDITIONAL_MODULE_PARAMS],
+		rc = newtWinEntries(ctr[TR_ISDN_MORE_PARAMS], ctr[TR_ENTER_ADDITIONAL_MODULE_PARAMS],
 			50, 5, 5, 40, entries, ctr[TR_OK], ctr[TR_CANCEL], NULL);	
 		
 		if (rc == 1)
@@ -497,7 +497,7 @@ int probeisdncard(void)
 		{
 			mysystem("/etc/ppp/isdn-cleanup");
 			sprintf(message, ctr[TR_DETECTED], cards[c].name);
-			newtWinMessage(TITLE, ctr[TR_OK], message);
+			newtWinMessage(ctr[TR_MESSAGE], ctr[TR_OK], message);
 			result = cards[c].type;
 			goto EXIT;
 		}
@@ -518,7 +518,7 @@ void handleisdnmsn(void)
 {
 	struct keyvalue *kv = initkeyvalues();
 	char msn[STRING_SIZE] = "";
-	const char *values[] = { msn, NULL };	/* pointers for the values. */
+	char *values[] = { msn, NULL };	/* pointers for the values. */
 	struct newtWinEntry entries[] =
 		{ { "", &values[0], 0,}, { NULL, NULL, 0 } };
 	int rc;
@@ -533,7 +533,7 @@ void handleisdnmsn(void)
 
 	for (;;)
 	{	
-		rc = newtWinEntries(TITLE, ctr[TR_ENTER_THE_LOCAL_MSN],
+		rc = newtWinEntries(ctr[TR_ISDN_LOCAL_NUMBER], ctr[TR_ENTER_THE_LOCAL_MSN],
 			50, 5, 5, 40, entries, ctr[TR_OK], ctr[TR_CANCEL], NULL);	
 		
 		if (rc == 1)

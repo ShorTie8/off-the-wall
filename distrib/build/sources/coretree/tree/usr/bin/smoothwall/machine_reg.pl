@@ -3,6 +3,8 @@
 use lib "/usr/lib/smoothwall";
 use header qw( :standard );
 
+use LWP;
+
 my (%eth,%isdn,%pppsettings);
 
 ## url length limit is 8192
@@ -121,7 +123,7 @@ close(USB);
 # construct the regular information
 my $nonextra = join('&', 
 	'cpu_vid=' . &_urlencode($vid),
-	'cpu_model=' . &_urlencode($model.' ($coreCount cores)'),
+	'cpu_model=' . &_urlencode($model . " ($coreCount cores)"),
 	'cpu_mhz=' . &_urlencode($mhz),
 	'mem=' . &_urlencode($mem),
 	'hdd=' . &_urlencode($disk),
@@ -159,13 +161,18 @@ unless ($proxy{'SERVER'})
 	$port = $proxy{'PORT'};
 }
 
-use IO::Socket;
-$sock = new IO::Socket::INET ( PeerAddr => $host, PeerPort => $port, Proto => 'tcp', Timeout => 5 ) or die "Could not connect to host\n\n";
-print $sock "GET http://$xhost/cgi-bin/system_register.cgi?$info HTTP/1.1\n";
-print $sock "Host: $xhost\n\n";
-undef $/;
-$retsrt = <$sock>;
-close $sock;
+my $regURL = "http://$xhost/cgi-bin/system_register.cgi?$info";
+$req = HTTP::Request->new(GET => $regURL);
+$ua = LWP::UserAgent->new;
+$ua->agent("Smoothwall/3.0");
+
+if ($proxy{'SERVER'})
+{
+	$ua->proxy(http => "http://$host:$port");
+}
+
+$rsp = $ua->request($req);
+$retsrt = $rsp->content();
 
 @page = split(/\n/,$retsrt,-1);
 $found = 0;

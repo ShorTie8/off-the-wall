@@ -7,15 +7,18 @@
 include ../Makefile.conf
 
 PACKAGE = grep
-VERSION = 2.5.4
+VERSION = 2.21
 
-BASE_URL = ftp://ftp.gnu.org/gnu/grep/
+BASE_URL = http://ftp.gnu.org/gnu/grep/
+EXTENSION = .tar.xz
 
+ifeq ($(BUILD_PHASE), Final)
+PKG_DIR = 
 
-ifeq ($(BUILD_PHASE), Stage_3)
-CONFIG_OPTS += --disable-perl-regexp --with-included-regex
-else
-CONFIG_OPTS += --bindir=/bin --with-included-regex
+CONFIG_OPTS += --prefix= --exec-prefix= \
+	       --datarootdir=/usr/share \
+	       --libexecdir=/usr/libexec \
+	       --includedir=/usr/include
 endif
 
 include ../Makefile.rules

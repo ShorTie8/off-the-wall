@@ -1,9 +1,9 @@
 include ../Makefile.conf
 
 PACKAGE = clamav
-VERSION = 0.99.1
+VERSION = 0.99.2
 
-BASE_URL = http://heanet.dl.sourceforge.net/project/$(PACKAGE)/$(PACKAGE)/$(VERSION)
+BASE_URL = https://www.clamav.net/downloads/production
 
 PRE_CONFIGURE = LIBS=-ltinfo
 CONFIG_OPTS += --sysconfdir=/usr/lib/smoothwall --with-dbdir=/var/clamav --disable-clamav --disable-ltdl-install --without-included-ltdl

@@ -11,10 +11,11 @@ EXTENSION = .tar.xz
 
 BASE_URL = http://downloads.sourceforge.net/project/xtables-addons/Xtables-addons
 
-PATCH_FILE1 = 64-bit-counters.patch
-
 CONFIG_OPTS += --with-gnu-ld \
-	      --with-kbuild=/build/sources/linux$(KERNEL_TYPE)/linux/ \
-	      --with-ksource=/lib/modules/$(K_SWE_VERSION)$(KERNEL_TYPE)/source
+	       --with-kbuild=/build/sources/linux$(KERNEL_TYPE)/linux/
+
+COMPILE = yes
+compile: configure
+	+$(PRE_COMPILE) $(MAKE) ${JOBS} -C $(COMPILE_DIR) V=1
 
 include ../Makefile.rules

@@ -12,52 +12,37 @@
 include ../Makefile.conf
 
 PACKAGE = perl-mods
-VERSION = 0.1
+VERSION = 0.0
 
 # List of all mods to be built. Add here, then add dir and makefile in
 #   version dir below. IO-Socket-SSL seems to depend on Net-SSLeay; both
 #   are moved to the end of the list.
 export PERL_MODS = \
 	    App-Control \
-	    Archive-Zip \
 	    Authen-NTLM \
 	    Authen-SASL \
-		Bit-Vector \
-		Carp-Clan \
 	    Config-Patch \
-		Digest-HMAC \
-		Sub-Uplevel \
-		Test-Exception \
 	    Date-Calc \
-	    Digest-SHA1 \
+	    FCGI \
+	    CGI-Fast \
 	    GD \
 	    GDTextUtil \
 	    GDGraph \
-		Geo-IP-PurePerl \
 	    HTML-Parser \
 	    HTML-Tagset \
 	    Log-Log4perl \
 	    Net-CIDR \
-		Net-DNS \
-		Net-IPv4Addr \
 	    Net-Netmask \
-		Net-Nslookup \
 	    Net-SMTPS \
 	    Net-SMTP-SSL \
 	    NetAddr-IP \
 	    RRD-Simple \
 	    Set-IntSpan \
-	    TimeDate \
 	    URI \
 	    libnet \
 	    libwww-perl \
 	    local-lib \
 	    Net-SSLeay \
-		DBD-SQLite \
-		MIME-Types \
-		MailTools \
-		Email-Date-Format \
-		MIME-Lite \
 	    IO-Socket-SSL \
 	    XML-Parser \
 	    XML-Simple

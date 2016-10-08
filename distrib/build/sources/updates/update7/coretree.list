@@ -70,11 +70,14 @@
 ./httpd/html/help/pppsetup.cgi.html.en
 ./httpd/html/help/time.cgi.html.en
 ./httpd/html/help/urlfilter.cgi.html.en
+./usr/bin/smoothwall/autoupdate.pl
+./usr/bin/smoothwall/backup_run
 ./usr/bin/smoothwall/smoothinfo.pl
 ./usr/bin/smoothwall/smoothinfoCLI.pl
 ./usr/bin/smoothwall/writeproxy.pl
 ./usr/bin/smoothwall/writentpd.pl
 ./usr/bin/smoothwall/writeupnp
+./usr/etc/dhcpcd.conf
 ./usr/lib/smoothwall/header.pm
 ./usr/lib/smoothwall/smoothnet.pm
 ./usr/lib/smoothwall/smoothtype.pm

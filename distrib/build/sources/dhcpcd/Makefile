@@ -4,10 +4,16 @@
 #
 # This code is distributed under the terms of the GPL v2.
 
+###
+# 2016-05-02
+# When dhcpcd is included in an update, be sure to add ./usr/etc/dhcpcd.conf
+# to coretree.list
+###
+
 include ../Makefile.conf
 
 PACKAGE = dhcpcd
-VERSION =  6.10.2
+VERSION =  6.11.2
 
 TARBALL = $(PACKAGE)-$(VERSION)
 EXTENSION = .tar.xz

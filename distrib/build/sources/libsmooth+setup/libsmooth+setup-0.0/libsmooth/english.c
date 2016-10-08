@@ -44,6 +44,12 @@ char *english_tr[] = {
 "Yes",
 /* TR_NO */
 "No",
+/* TR_NOTE */
+"NOTE",
+/* TR_WARNING */
+"WARNING",
+/* TR_MESSAGE */
+"Message",
 
 /*************/
 /* LIBSMOOTH */
@@ -105,6 +111,8 @@ char *english_tr[] = {
 /***********/
 /* INSTALL */
 /***********/
+/* TR_BASIC */
+"Basic Installer",
 /* TR_WELCOME */
 "Welcome to the Smoothwall Express installation program. Please visit our " \
 "homepage at http://www.smoothwall.org.  Selecting Cancel on any " \
@@ -113,6 +121,8 @@ char *english_tr[] = {
 "No harddisk found.",
 /* TR_SELECT_INSTALLATION_MEDIA */
 "Select installation media",
+/* TR_ENTER_TARBALL_URL */
+"Enter the URL of the install tarball",
 /* TR_SELECT_INSTALLATION_MEDIA_LONG */
 "Smoothwall Express can be installed from multiple sources.  The simplest is to " \
 "use the machines CDROM drive. If the computer lacks a drive, you may " \
@@ -338,6 +348,8 @@ char *english_tr[] = {
 "Section menu",
 /* TR_SELECT_THE_ITEM */
 "Select the item you wish to configure.",
+/* TR_SETUP_COMPLETE */
+"Finished",
 /* TR_SETUP_FINISHED */
 "Setup is complete.  Press Ok to reboot.",
 /* TR_SETUP_NOT_COMPLETE */
@@ -356,6 +368,8 @@ char *english_tr[] = {
 "reboot now?",
 
 /* passwords.c */
+/* TR_PASSWORD */
+"Initial passwords",
 /* TR_ENTER_ROOT_PASSWORD */
 "Enter the 'root' user password. Login as this user for commandline access.",
 /* TR_SETTING_ROOT_PASSWORD */
@@ -441,6 +455,10 @@ char *english_tr[] = {
 "Choose the ISDN protocol you require.",
 /* TR_AUTODETECT */
 "* AUTODETECT *",
+/* TR_ISDN_MORE_PARAMS */
+"Option Parameters",
+/* TR_ISDN_LOCAL_NUMBER */
+"ISDN Number",
 /* TR_ISDN_CARD_SELECTION */
 "ISDN card selection",
 /* TR_CHOOSE_THE_ISDN_CARD_INSTALLED */
@@ -536,8 +554,6 @@ char *english_tr[] = {
 "Enter the module name and parameters for the driver you require.",
 /* TR_LOADING_MODULE */
 "Loading module...",
-/* TR_WARNING */
-"WARNING",
 /* TR_WARNING_LONG */
 "If you change this IP address, and you are logged in remotely, " \
 "your connection to the Smoothwall Express machine will be broken, and you will " \
