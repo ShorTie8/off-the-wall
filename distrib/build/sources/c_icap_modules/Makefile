@@ -1,11 +1,11 @@
 include ../Makefile.conf
 
 PACKAGE = c_icap_modules
-VERSION = 0.3.2
+VERSION = 0.4.4
 
 PACKAGE_ALT = c-icap
 
-BASE_URL = http://downloads.sourceforge.net/project/$(PACKAGE_ALT)/$(PACKAGE_ALT)-modules/0.3.x
+BASE_URL = http://downloads.sourceforge.net/project/$(PACKAGE_ALT)/$(PACKAGE_ALT)-modules/0.4.x
 
 CONFIGURE = yes
 configure: patch

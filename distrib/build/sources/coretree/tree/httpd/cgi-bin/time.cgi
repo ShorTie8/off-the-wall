@@ -130,7 +130,7 @@ if ($cgitimesettings{'ACTION'} eq $tr{'save'}) {
 		$cgitimesettings{'VALID'} = 'yes';
 
 		# Manual set works, enabled or not.
-		if ($cgitimesettings{'NTP_METHOD'} eq 'MANUAL') {
+		if ($cgitimesettings{'NTP_METHOD'} eq 'Manual') {
 			my ($year, $month, $day, $hour, $minute, $second);
 			$year = $cgitimesettings{'YEAR'};
 			$month = $cgitimesettings{'MONTH'};
@@ -197,9 +197,7 @@ $checked{'ENABLED'}{$timesettings{'ENABLED'}} = 'CHECKED';
 
 foreach (@timezones) {
 	chomp;
-	my $file = $_;
-	$file =~ s/_/ /g;
-	$selected{'TIMEZONE'}{$file} = '';
+	$selected{'TIMEZONE'}{$_} = '';
 }
 $selected{'TIMEZONE'}{$timesettings{'TIMEZONE'}} = 'SELECTED';
 

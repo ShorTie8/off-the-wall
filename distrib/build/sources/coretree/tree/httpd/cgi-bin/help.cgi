@@ -26,6 +26,7 @@ print STDERR "Help GET:$ENV{'QUERY_STRING'}\n";
 
 ($tmp, $modname) = split("/", $ENV{'QUERY_STRING'}) if ($ENV{'QUERY_STRING'});
 
+if ($tmp eq "logs.cgi") { $tmp = $modname; }
 if ($tmp ne "mods") {
 	# This is a stock help file.
 	$needhelpwith = $tmp;
