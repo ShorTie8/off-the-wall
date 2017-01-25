@@ -27,6 +27,7 @@ export UDEVunused = udev
 # Document these pkgs, don't install.
 # Some of these are retirees.
 TOOLCHAIN_PKGS = expect
+
 OTHER_PKGS = updates jam $(UDEVunused) udev-config cnxadsl \
 	     libart_lgpl procps procinfo dev86
 
@@ -56,10 +57,10 @@ INST_PKGS = glibc libsmooth+setup libgcc freetype libpng libdnet \
 	    ibod dhcpcd eciadsl-synch_bin eciadsl-usermode dhcp snort \
 	    oinkmaster openswan wireless_tools imspector diffutils clamav \
 	    p3scan siproxd which miniupnpd ez-ipupdate noip cdrtools \
-	    suricata smartmontools at dosfstools grub linux-atm \
+	    smartmontools at dosfstools grub linux-atm \
 	    mtools nano reiserfsprogs parted xtables-addons cpio dialog \
-	    $(UDEV) lm_sensors xz pcmciautils qemu sysfsutils db squidGuard \
-	    apcupsd cacert-bundle setkerneltz fping \
+	    $(UDEV) lm_sensors xz pcmciautils qemu sysfsutils db \
+	    apcupsd cacert-bundle setkerneltz fping iptraf-ng htop \
 	    kernel-drivers \
 	    coretree $(ADV_PKGS) device-ids
 
