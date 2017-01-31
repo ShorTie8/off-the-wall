@@ -8,7 +8,7 @@ include ../Makefile.conf
 include ../Makefile.versions
 
 PACKAGE = binutils
-VERSION = 2.22
+VERSION = 2.24
 
 BASE_URL = http://ftp.gnu.org/gnu/binutils
 TARBALL = $(PACKAGE)-$(VERSION)
@@ -22,7 +22,7 @@ TAR_MPFR = mpfr-$(MPFR_VER).tar.bz2
 
 COMPILE_DIR = $(DIR)-compile
 
-PATCH_FILE1 = binutils-2.22-build_fix-1.patch
+#PATCH_FILE1 = binutils-2.22-build_fix-1.patch
 
 ifeq ($(BITS_64), yes)
 	BITS = 64
