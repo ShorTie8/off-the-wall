@@ -102,6 +102,10 @@ rm /tmp/a.a /tmp/b.b
 grep 'SEARCH.*/usr/lib' dummy.log |sed 's|; |\n|g' >/tmp/a.a
 case $mARCH in
   $ARCH32) cat >/tmp/b.b <<END
+SEARCH_DIR("/usr/${FINAL_TGT}/lib32")
+SEARCH_DIR("/usr/local/lib32")
+SEARCH_DIR("/lib32")
+SEARCH_DIR("/usr/lib32")
 SEARCH_DIR("/usr/${FINAL_TGT}/lib")
 SEARCH_DIR("/usr/local/lib")
 SEARCH_DIR("/lib")
