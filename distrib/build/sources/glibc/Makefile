@@ -15,7 +15,7 @@ EXTENSION = .tar.bz2
 BASE_URL =  ftp://ftp.gnu.org/gnu/glibc
 TZ_VERSION = 2016f
 TZ_TARBALL = tzdata$(TZ_VERSION).tar.gz
-TZ_URL =  http://www.iana.org/time-zones/repository/releases/$(TZ_TARBALL)
+TZ_URL =  ftp://ftp.iana.org/tz/releases/$(TZ_TARBALL)
 
 COMPILE_DIR = $(DIR)-compile
 

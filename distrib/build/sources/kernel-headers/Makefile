@@ -14,11 +14,25 @@ VERSION = 0.0
 CFG_TYPE := $(KERNEL_TYPE)-$(mARCH)
 
 download:
+	echo $(KERNEL_URL)
 	@$(DL_CMD) $(KERNEL_URL)
 
 install: download
+ifeq ($(mARCH),$(mTUPLE))
 	@tar -xvf $(DOWNLOADS_DIR)/linux-$(KERNEL_VER).tar.xz
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3))
+	tar xf $(DOWNLOADS_DIR)/linux-$(KERNEL_COM).tar.gz
+	mv linux-$(KERNEL_COM) linux-$(KERNEL_VER)
+else ifeq ($(mTUPLE), ODROID-XU3)
+	tar xf $(DOWNLOADS_DIR)/linux-$(KERNEL_COM).tar.gz
+	mv linux-$(KERNEL_COM) linux-$(KERNEL_VER)
+else
+  echo "Unsupported kernel-headers"
+  exit 76
+endif
+
 ifeq ($(BUILD_PHASE), Stage_1)
+ifeq ($(mARCH),$(mTUPLE))
 	+cd linux-$(KERNEL_VER); \
 	make mrproper; \
 	  sed -e 's/^CONFIG_LOCALVERSION=.*$$/CONFIG_LOCALVERSION="$(KERNEL_TYPE)"/' ../../linux.config$(CFG_TYPE) > .config; \
@@ -27,8 +41,24 @@ ifeq ($(BUILD_PHASE), Stage_1)
 	  cp arch/x86/include/generated/asm/* arch/x86/include/asm/; \
 	  make INSTALL_HDR_PATH=dest headers_install; \
 	  cp -rv dest/include/* $(TOOLS_DIR)/include
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3))
+	cd linux-$(KERNEL_VER); make mrproper
+	cd linux-$(KERNEL_VER); KERNEL=kernel7
+	cd linux-$(KERNEL_VER); make bcm2709_defconfig
+	cd linux-$(KERNEL_VER); make headers_check; \
+	  make INSTALL_HDR_PATH=dest headers_install; \
+	  cp -rv dest/include/* $(TOOLS_DIR)/include
+else ifeq ($(mTUPLE), ODROID-XU3)
+	cd linux-$(KERNEL_VER); make mrproper
+	cd linux-$(KERNEL_VER); make odroidxu3_defconfig
+	cd linux-$(KERNEL_VER); make headers_check; \
+	  make INSTALL_HDR_PATH=dest headers_install; \
+	  cp -rv dest/include/* $(TOOLS_DIR)/include
 endif
+endif
+
 ifeq ($(BUILD_PHASE), Final)
+ifeq ($(mARCH),$(mTUPLE))
 	+mkdir -p $(PKG_ROOT); \
 	cd linux-$(KERNEL_VER); \
 	  make ${JOBS} mrproper
@@ -42,6 +72,24 @@ ifeq ($(BUILD_PHASE), Final)
 	  make ${JOBS} INSTALL_HDR_PATH=$(PKG_ROOT)$(PKG_DIR) headers_install
 	cd linux-$(KERNEL_VER); \
 	  find $(PKG_ROOT)$(PKG_DIR)/include \( -name .install -o -name ..install.cmd \) -delete
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3))
+	mkdir -p $(PKG_ROOT)
+	cd linux-$(KERNEL_VER); make mrproper
+	cd linux-$(KERNEL_VER); KERNEL=kernel7
+	cd linux-$(KERNEL_VER); make bcm2709_defconfig
+	cd linux-$(KERNEL_VER); make ${JOBS} prepare
+	cd linux-$(KERNEL_VER); make ${JOBS} headers_check
+	cd linux-$(KERNEL_VER); make ${JOBS} INSTALL_HDR_PATH=$(PKG_ROOT)$(PKG_DIR) headers_install
+	cd linux-$(KERNEL_VER); find $(PKG_ROOT)$(PKG_DIR)/include \( -name .install -o -name ..install.cmd \) -delete
+else ifeq ($(mTUPLE), ODROID-XU3)
+	mkdir -p $(PKG_ROOT)
+	cd linux-$(KERNEL_VER); make mrproper
+	cd linux-$(KERNEL_VER); make odroidxu3_defconfig
+	cd linux-$(KERNEL_VER); make ${JOBS} prepare
+	cd linux-$(KERNEL_VER); make ${JOBS} headers_check
+	cd linux-$(KERNEL_VER); make ${JOBS} INSTALL_HDR_PATH=$(PKG_ROOT)$(PKG_DIR) headers_install
+	cd linux-$(KERNEL_VER); find $(PKG_ROOT)$(PKG_DIR)/include \( -name .install -o -name ..install.cmd \) -delete
+endif
 endif
 
 build-tarball: install

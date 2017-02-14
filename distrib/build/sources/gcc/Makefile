@@ -8,7 +8,7 @@ include ../Makefile.conf
 include ../Makefile.versions
 
 PACKAGE = gcc
-VERSION = 4.7.3
+VERSION = 4.9.4
 
 BASE_URL = ftp://ftp.gnu.org/gnu/gcc/gcc-$(VERSION)
 EXTENSION = .tar.bz2
@@ -32,13 +32,25 @@ download:
 	@$(DL_CMD) $(BASE_MPC)/$(TAR_MPC)
 	@$(DL_CMD) $(BASE_URL)/$(TARBALL)$(EXTENSION) $(MD5)
 
+ifeq ($(mTUPLE), rpi2)
+  export GCC_flags = --with-arch=armv7-a --with-cpu=cortex-a7 --with-fpu=vfpv4 --with-float=hard 
+else ifeq ($(mTUPLE), rpi3)
+  export GCC_flags = --with-arch=armv8-a --with-cpu=cortex-a53 --with-fpu=neon-fp-armv8 --with-float=hard 
+else ifeq ($(mTUPLE), ODROID-XU3)
+  export GCC_flags = --with-arch=armv7-a --with-cpu=cortex-a15 --with-cpu=cortex-a7 --with-fpu=vfpv3-d16 --with-float=hard 
+endif
 
 # Tool Chain Build Stage 1
 #
 ifeq ($(BUILD_PHASE), Stage_1)
 
+#	--with-system-zlib
+ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3 ODROID-XU3))
+  export GCC_flags += --disable-libatomic --enable-linker-build-id --enable-clocale=gnu --enable-gnu-unique-object --enable-objc-gc --disable-sjlj-exceptions 
+endif
+
 # should target be FINAL_TGT?
-CONFIG_OPTS = \
+CONFIG_OPTS = $(GCC_flags) \
 	      --target=$(SWE_TGT) \
 	      --prefix=$(TOOLS_DIR) \
 	      --with-sysroot=$(ROOT) \
@@ -65,7 +77,7 @@ patch: $(DIR)/
 	cd $(DIR); tar -xvf ../../../downloads/$(TAR_MPFR); mv mpfr-$(MPFR_VER) mpfr
 	cd $(DIR); tar -xvf ../../../downloads/$(TAR_MPC); mv mpc-$(MPC_VER) mpc
 	cd $(DIR); \
-	  for file in `find gcc/config -name linux64.h -o -name linux.h -o -name sysv4.h`; \
+	  for file in `find gcc/config -name linux64.h -o -name linux.h -o -name sysv4.h -o -name linux-eabi.h -o -name linux-elf.h`; \
 	  do \
   	    cp -uv $$file{,.orig}; \
   	    sed -e 's@/lib\(64\)\?\(32\)\?/ld@$(TOOLS_DIR)&@g' \
@@ -80,6 +92,12 @@ patch: $(DIR)/
 
 COMPILE = yes
 compile: configure
+	cd $(COMPILE_DIR); \
+	case $(shell uname -m) in \
+      armv6l) sed -i 's/none-/armv6l-/' Makefile ;; \
+      armv7l) sed -i 's/none-/armv7l-/' Makefile ;; \
+      armv8l) sed -i 's/none-/armv8l-/' Makefile ;; \
+    esac
 	$(MAKE) $(JOBS) -C $(COMPILE_DIR)
 
 INSTALL = yes
@@ -108,7 +126,9 @@ patch: $(DIR)/
 	cd $(DIR); \
 	for file in `find gcc/config -name linux64.h \
 	                          -o -name linux.h \
-	                          -o -name sysv4.h`; do \
+	                          -o -name sysv4.h \
+	                          -o -name linux-eabi.h \
+	                          -o -name linux-elf.h`; do \
 	  cp -uv $$file{,.orig}; \
 	  (  sed -e 's@/lib\(64\)\?\(32\)\?/ld@$(TOOLS_DIR)&@g' \
 		 -e 's@/usr@$(TOOLS_DIR)@g' "$$file.orig"; \
@@ -126,7 +146,14 @@ patch: $(DIR)/
 PRE_CONFIGURE = CC=$(SWE_TGT)-gcc \
 	        AR=$(SWE_TGT)-ar RANLIB=$(SWE_TGT)-ranlib
 
-CONFIG_OPTS = \
+ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3 ODROID-XU3))
+  export GCC_flags += --enable-linker-build-id --enable-clocale=gnu --enable-gnu-unique-object --enable-objc-gc 
+else
+  export GCC_flags = --disable-multilib --disable-bootstrap --disable-libgomp 
+endif
+
+
+CONFIG_OPTS = $(GCC_flags) \
 	      --host=$(FINAL_TGT) \
 	      --build=$(FINAL_TGT) \
 	      --target=$(FINAL_TGT) \
@@ -139,13 +166,17 @@ CONFIG_OPTS = \
 	      --enable-__cxa_atexit       \
 	      --enable-languages=c,c++    \
 	      --disable-libstdcxx-pch     \
-	      --disable-multilib          \
-	      --disable-bootstrap         \
-	      --disable-libgomp           \
 	      --with-mpfr-include=$(SOURCES_DIR)/$(PACKAGE)/$(DIR)/mpfr/src \
 	      --with-mpfr-lib=$(SOURCES_DIR)/$(PACKAGE)/$(COMPILE_DIR)/mpfr/src/.libs
 
+# Might not need case, not in final
 compile: configure
+	cd $(COMPILE_DIR); \
+	case $(shell uname -m) in \
+      armv6l) sed -i 's/none-/armv6l-/' Makefile ;; \
+      armv7l) sed -i 's/none-/armv7l-/' Makefile ;; \
+      armv8l) sed -i 's/none-/armv8l-/' Makefile ;; \
+    esac
 	$(MAKE) $(JOBS) -C $(COMPILE_DIR)
 
 install:  compile
@@ -170,7 +201,7 @@ ifeq ($(BITS_32), yes)
 endif
 	cd $(DIR); sed -i -e '/autogen/d' -e '/check.sh/d' fixincludes/Makefile.in
 
-CONFIG_OPTS =  \
+CONFIG_OPTS =  $(GCC_flags)  \
 	        --host=$(FINAL_TGT) \
 	        --build=$(FINAL_TGT) \
 	        --target=$(FINAL_TGT) \

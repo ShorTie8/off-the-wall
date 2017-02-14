@@ -14,12 +14,51 @@ KERNEL_VER = $(KERNEL_MMR).38
 KLIBKERNVER = $(KERNEL_VER)
 
 K_RAW_VERSION = $(KERNEL_VER)
+
+ifeq ($(mARCH),$(mTUPLE))
+KERNEL_URL = http://www.kernel.org/pub/linux/kernel/v$(KERNEL_MAJOR).x/linux-$(K_RAW_VERSION).tar.xz
+# Note: Any rpi kernel changes are needed in firmware too...
+else ifeq ($(mTUPLE), rpi2)
+    export KERNEL=kernel7
+    KERNEL_MAJOR = 3
+    KERNEL_MMR = $(KERNEL_MAJOR).18
+    KERNEL_VER = $(KERNEL_MMR).16-v7
+    KERNEL_COM = 1bb18c8f721ef674a447f3622273f2e2de7a205c
+    KERNEL_URL = https://github.com/raspberrypi/linux/archive/$(KERNEL_COM)/linux-$(KERNEL_COM).tar.gz
+    K_RAW_VERSION = $(KERNEL_VER)
+else ifeq ($(mTUPLE), rpi3)
+    export KERNEL=kernel7
+    KERNEL_MAJOR = 4
+    KERNEL_MMR = $(KERNEL_MAJOR).1
+    KERNEL_VER = $(KERNEL_MMR).21-v7
+    KERNEL_COM = ff45bc0e8917c77461b2901e2743e6339bb70413
+#    KERNEL_MAJOR = 4
+#    KERNEL_MMR = $(KERNEL_MAJOR).4
+#    KERNEL_VER = $(KERNEL_MMR).48-v7
+#    KERNEL_COM = fb50a274e277b6e25588bf96fd8ed8814f4d95c6
+    KERNEL_URL = https://github.com/raspberrypi/linux/archive/$(KERNEL_COM)/linux-$(KERNEL_COM).tar.gz
+    K_RAW_VERSION = $(KERNEL_VER)
+else ifeq ($(mTUPLE), ODROID-XU3)
+    # ODROID-XU3/4
+    KERNEL_MAJOR = 3
+    KERNEL_MMR = $(KERNEL_MAJOR).10
+    KERNEL_VER = $(KERNEL_MMR).104
+    KERNEL_COM = a9f124fbb684ea076ee74d2c02eeab8aa3fe42c3
+    KERNEL_URL = https://github.com/hardkernel/linux/archive/$(KERNEL_COM)/linux-$(KERNEL_COM).tar.gz
+    K_RAW_VERSION = $(KERNEL_VER)
+else
+	KERNEL_URL = Unknown_system_kernel
+endif
+
 K_SWE_VERSION = $(KERNEL_VER)$(KERNEL_TYPE)
 
-KERNEL_URL = http://www.kernel.org/pub/linux/kernel/v$(KERNEL_MAJOR).x/linux-$(K_RAW_VERSION).tar.xz
-
-FREESWAN_TYPE = openswan
-FREESWAN_VER = 2.6.49
+ifeq ($(KERNEL_MAJOR), 4)
+	FREESWAN_TYPE = libreswan
+	FREESWAN_VER = 3.16
+else
+	FREESWAN_TYPE = openswan
+	FREESWAN_VER = 2.6.49
+endif
 
 IPTABLES_VER = 1.6.0
 XTABLES_ADDONS_VER = 2.10

@@ -16,6 +16,14 @@ EXTENSION = .tar.xz
 
 BASE_URL = http://www.kernel.org/pub/linux/libs/klibc/$(VER_MM)/
 
+ifeq ($(mTUPLE), rpi2)
+export ARM_STUFF = ARCH=arm CONFIG_AEABI=y CPU_ARCH=armv7-a CPU_TUNE=cortex-a7 CONFIG_KLIBC_THUMB=y KBUILD_VERBOSE=1
+else ifeq ($(mTUPLE), rpi3)
+export ARM_STUFF = ARCH=arm CONFIG_AEABI=y CPU_ARCH=armv8-a CPU_TUNE=cortex-a53 CONFIG_KLIBC_THUMB=y KBUILD_VERBOSE=1
+else ifeq ($(mTUPLE), ODROID-XU3)
+export ARM_STUFF = ARCH=arm CONFIG_AEABI=y CPU_ARCH=armv7-a CPU_TUNE=cortex-a15 CONFIG_KLIBC_THUMB=y KBUILD_VERBOSE=1
+endif
+
 DOWNLOAD = yes
 download:
 	@NO_CHECK_CERT= $(DL_CMD) $(BASE_URL)/$(TARBALL)$(EXTENSION) $(MD5)
@@ -27,7 +35,7 @@ configure: patch
 COMPILE = yes
 compile: configure
 	cd $(DIR); \
-	  $(MAKE) $(JOBS) V=1 prefix=/usr KLIBCKERNELSRC=/build/sources/kernel-headers/linux-$(KERNEL_VER)/usr/
+	  $(MAKE) $(JOBS) V=1 prefix=/usr KLIBCKERNELSRC=/build/sources/kernel-headers/linux-$(KERNEL_VER)/usr/ $(ARM_STUFF)
 
 
 INSTALL = yes
@@ -35,7 +43,7 @@ install: compile
 	@mkdir -p $(PKG_ROOT)$(PKG_DIR)
 	cd $(DIR); \
 	  sed -i -e 's=SRC) ARCH=SRC)/../ ARCH=' scripts/Kbuild.install; \
-	  $(MAKE) V=1 INSTALLROOT=$(PKG_ROOT) prefix=/usr KLIBCKERNELSRC=/build/sources/kernel-headers/linux-$(KERNEL_VER)/usr install
+	  $(MAKE) V=1 INSTALLROOT=$(PKG_ROOT) prefix=/usr KLIBCKERNELSRC=/build/sources/kernel-headers/linux-$(KERNEL_VER)/usr $(ARM_STUFF) install
 
 CLEAN = yes
 clean:

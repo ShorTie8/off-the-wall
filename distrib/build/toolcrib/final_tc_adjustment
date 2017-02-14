@@ -41,6 +41,8 @@ if [ $STATUS -eq 0 ]; then
 
   # Must use the correct ProgInterp
   case $mARCH in
+    arm) expectInterp="/lib/ld-linux-armhf.so.3" ;;
+    arm64) expectInterp="/lib/ld-linux-aarch64.so.1" ;;
     i*86) expectInterp="/lib/ld-linux.so.2" ;;
     x86_64) expectInterp="/lib64/ld-linux-x86-64.so.2" ;;
   esac
@@ -111,10 +113,13 @@ END
   # Loader using correct search paths?
   #
   grep 'SEARCH.*/usr/lib' dummy.log |sed 's|; |\n|g' >/tmp/a.a
+  # Newer binutils include like SEARCH_DIR("=/tools/arm-swe-linux-gnueabihf/lib")
+  # at the end because it is a valid search path, so remove it
+  sed '$d' -i /tmp/a.a
 
   cat >>/tmp/b.b <<END
 SEARCH_DIR("/usr/lib")
-SEARCH_DIR("/lib");
+SEARCH_DIR("/lib")
 END
   diff /tmp/a.a /tmp/b.b >/dev/null 2>&1
   if [ $? -ne 0 ]; then

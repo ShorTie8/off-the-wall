@@ -8,7 +8,7 @@ include ../Makefile.conf
 include ../Makefile.versions
 
 PACKAGE = binutils
-VERSION = 2.24
+VERSION = 2.25.1
 
 BASE_URL = http://ftp.gnu.org/gnu/binutils
 TARBALL = $(PACKAGE)-$(VERSION)
@@ -32,13 +32,18 @@ endif
 #
 ifeq ($(BUILD_PHASE), Stage_1)
 
+ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3 ODROID-XU3))
+  export ARM_flags = --disable-shared --disable-threads --enable-interwork --enable-multilib --with-gcc --with-gnu-as --with-gnu-ld 
+endif
+
 CONFIG_OPTS = \
 	      --target=$(SWE_TGT)        \
 	      --prefix=$(TOOLS_DIR)      \
 	      --with-sysroot=$(ROOT)     \
 	      --with-lib-path=$(TOOLS_DIR)/lib \
 	      --disable-nls              \
-	      --disable-werror
+	      --disable-werror \
+	      $(ARM_flags)
 
 COMPILE = yes
 compile: configure
@@ -58,6 +63,10 @@ endif # Stage 1
 #
 ifeq ($(BUILD_PHASE), Stage_2)
 
+ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3 ODROID-XU3))
+  export ARM_flags = --enable-interwork --enable-multilib --with-gcc --with-gnu-as --with-gnu-ld 
+endif
+
 PRE_CONFIGURE = CC=$(SWE_TGT)-gcc \
 	        AR=$(SWE_TGT)-ar RANLIB=$(SWE_TGT)-ranlib
 
@@ -68,7 +77,8 @@ CONFIG_OPTS = \
 	      --prefix=$(TOOLS_DIR) \
 	      --disable-nls \
 	      --with-sysroot     \
-	      --with-lib-path=$(TOOLS_DIR)/lib
+	      --with-lib-path=$(TOOLS_DIR)/lib \
+	      $(ARM_flags)
 
 COMPILE = yes
 compile: configure
@@ -107,7 +117,7 @@ patch: $(DIR)/
 	cd $(DIR); tar -xvf ../../../downloads/$(TAR_MPFR); mv mpfr-$(MPFR_VER) mpfr
 	rm -fv $(DIR)/etc/standards.info
 	sed -i.bak '/^INFO/s/standards.info //' $(DIR)/etc/Makefile.in
-	cd $(DIR); cat binutils-2.22-build_fix-1.patch | patch -p1 || exit 14
+#	cd $(DIR); cat binutils-2.22-build_fix-1.patch | patch -p1 || exit 14
 
 
 COMPILE = yes

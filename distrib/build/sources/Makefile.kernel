@@ -14,7 +14,18 @@ download:
 	@$(DL_CMD) $(KERNEL_URL)
 
 unpack: download
+ifeq ($(mTUPLE),$(mARCH))
 	@tar -xvf $(DOWNLOADS_DIR)/linux-$(K_RAW_VERSION).tar.xz
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3))
+	tar xf $(DOWNLOADS_DIR)/linux-$(KERNEL_COM).tar.gz
+	mv linux-$(KERNEL_COM) linux-$(KERNEL_VER)
+else ifeq ($(mTUPLE), ODROID-XU3)
+	tar xf $(DOWNLOADS_DIR)/linux-$(KERNEL_COM).tar.gz
+	mv linux-$(KERNEL_COM) linux-$(KERNEL_VER)
+else
+	echo "Unsupported Makefile-kernel untar"
+	exit 76
+endif
 
 
 prepare: unpack
@@ -23,21 +34,48 @@ prepare: unpack
 
 	make -C linux mrproper
 
+ifeq ($(mTUPLE),$(mARCH))
 	sed -e 's/^CONFIG_LOCALVERSION=.*$$/CONFIG_LOCALVERSION="$(KERNEL_TYPE)"/' ../linux.config$(KERNEL_TYPE)-$(mARCH) > linux/.config
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3))
+	cd linux-$(KERNEL_VER); make bcm2709_defconfig
+else ifeq ($(mTUPLE), ODROID-XU3)
+	cd linux-$(KERNEL_VER); make odroidxu3_defconfig
+endif
 
 	make -C linux CC=$(COMPILER) clean prepare
 
 
 compile-kernel: prepare
+ifeq ($(mTUPLE),$(mARCH))
 	sed -e 's/^CONFIG_LOCALVERSION=.*$$/CONFIG_LOCALVERSION="$(KERNEL_TYPE)"/' ../linux.config$(KERNEL_TYPE)-$(mARCH) > linux/.config
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3))
+	cd linux-$(KERNEL_VER); make bcm2709_defconfig
+else ifeq ($(mTUPLE), ODROID-XU3)
+	cd linux-$(KERNEL_VER); make odroidxu3_defconfig
+endif
 
 	make -C linux CC=$(COMPILER) clean
 	make $(JOBS) V=1 -C linux CC=$(COMPILER) oldconfig
+ifeq ($(mARCH),$(mTUPLE))
 	make $(JOBS) V=1 -C linux CC=$(COMPILER) bzImage
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3 ODROID-XU3))
+	@echo; echo; echo "Make zImage"; echo
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) zImage
+else
+	echo "Unsupported kernel compile"
+	exit 76
+endif
+
+	@echo; echo; echo "Make modules"; echo
 	make $(JOBS) V=1 -C linux CC=$(COMPILER) modules
 
+ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3 ODROID-XU3))
+	@echo; echo; echo "Make dtbs"; echo
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) dtbs
+endif
 
 package-kernel: compile-kernel
+ifeq ($(mTUPLE),$(mARCH))
 	mkdir -p $(PKG_ROOT)
 	(cd $(PKG_ROOT); \
 	make -C $(KERNEL_DIR) CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install; \
@@ -46,6 +84,33 @@ package-kernel: compile-kernel
 	cp $(KERNEL_DIR)/System.map boot/System.map-$(K_SWE_VERSION); \
 	rm -f lib/modules/$(K_SWE_VERSION)/build; \
 	cp $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config$(KERNEL_TYPE)-$(mARCH).new)
+
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3))
+	echo; echo "Make modules_install"; echo
+	(cd $(PKG_ROOT); make -C $(KERNEL_DIR) CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install)
+	echo; echo; echo "scripts/mkknlimg"; echo
+#	283x: n, xz utils needs upgrade or installed to use
+	#(cd $(KERNEL_DIR); sudo scripts/mkknlimg arch/arm/boot/zImage $(PKG_ROOT)/boot/$(KERNEL).img)
+	mkdir -vp $(PKG_ROOT)/boot/overlays
+	cp -v $(KERNEL_DIR)/System.map $(PKG_ROOT)/boot/System.map-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/*.dtb $(PKG_ROOT)/boot
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/overlays/*.dtb* $(PKG_ROOT)/boot/overlays/
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/overlays/README $(PKG_ROOT)/boot/overlays/
+	cp -v $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config-$(mTUPLE).new
+
+else ifeq ($(mTUPLE),ODROID-XU3)
+	cd $(PKG_ROOT); make -C $(KERNEL_DIR) CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install
+	mkdir -vp $(PKG_ROOT)/boot
+	cp -v $(KERNEL_DIR)/arch/arm/boot/zImage $(PKG_ROOT)/boot/vmlinuz-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/System.map $(PKG_ROOT)/boot/System.map-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/exynos5422-odroidxu3.dtb $(PKG_ROOT)/boot/exynos5422-odroidxu3.dtb
+#	rm -f lib/modules/$(K_SWE_VERSION)/build; \
+	cp $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config-$(mTUPLE).new
+else
+	echo "Unsupported package-kernel"
+	exit 76
+endif
+ 
 
 
 build-tarball: package-kernel $(PACKAGES)

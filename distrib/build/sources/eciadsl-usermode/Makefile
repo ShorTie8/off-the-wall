@@ -11,6 +11,10 @@ VERSION = 0.12
 
 BASE_URL = http://eciadsl.flashtux.org/download/
 
+ifeq ($(mARCH),$(mTUPLE))
 PATCH_FILE1 = pusb-linux.c.patch
+else
+PATCH_FILE1 = pusb-linux.c-2.patch
+endif
 
 include ../Makefile.rules
