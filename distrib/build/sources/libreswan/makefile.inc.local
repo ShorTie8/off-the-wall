@@ -1,0 +1,4 @@
+INITSYSTEM = sysvinit
+USE_LIBCURL = false
+USE_XAUTHPAM = false
+INC_USRLOCAL = /usr
