@@ -1,0 +1,8 @@
+# SmoothWall cmdline.txt By: ShorTie
+# Kernel
+dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p4 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait quiet
+# initramfs
+#dwc_otg.lpm_enable=0 root=/dev/mmcblk0p4 rootfstype=ext4 noatime quiet rootwait loglevel=1 persistent-logs zram.num_devices=4
+
+
+#dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/mmcblk0p4 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait

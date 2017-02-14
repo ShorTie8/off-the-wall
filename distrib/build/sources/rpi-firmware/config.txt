@@ -1,0 +1,5 @@
+[all]
+kernel=vmlinuz-4.1.19-v7+
+#initramfs initrd-${UNAME-R}.gz
+[pi3]
+enable_uart=1
