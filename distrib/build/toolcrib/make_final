@@ -257,7 +257,13 @@ fi
       build linux
       #build linux-backports
       build linux-firmware
+   if [ "$mTUPLE" == "rpi2" ] || [ "$mTUPLE" == "rpi3" ]; then
+      build rpi-firmware
+   elif [ "$mTUPLE" == "ODROID-XU3" ]; then
+      echo "filler"
+   else
       build kernel-drivers
+   fi
       JOBS=$JOBS_UP
       build iptables
       JOBS=$JOBS_MP
@@ -313,7 +319,11 @@ fi
       build trafficstats
       build setuids
       build install
+   if [ "$mTUPLE" == "$mARCH" ]; then
       build coretree
+   else
+      build coretree-sdcard
+   fi
 
       build openssh
       build ntp
@@ -322,7 +332,7 @@ fi
       build squid
 
       build ppp
-      build isdn4k-utils
+  #    build isdn4k-utils
       build rp-pppoe
       build ibod
       build dhcpcd
@@ -338,13 +348,21 @@ fi
       echo
       echo -e "  Final group 6 packages (last utils)"
       build mtools
+   if [ "$mTUPLE" == "$mARCH" ]; then
       build cdrtools
+   fi
       build busybox
 
       build dhcp
       build snort
       build oinkmaster
+  echo -n "KERNEL_MAJOR is "; echo $KERNEL_MAJOR
+  if [ "$mTUPLE" == "rpi3" ]; then
+  #if [ "$KERNEL_MAJOR" == "4" ] && [ "$KERNEL_MMR" >= "1" ]; then
+      build libreswan
+  else
       build openswan
+  fi
       build wireless_tools
 
       build noip
@@ -368,7 +386,9 @@ fi
       build miniupnpd
       build inotify
       build cpio
+   if [ "$mTUPLE" == "$mARCH" ]; then
       build grub
+   fi
       build reiserfsprogs
       build parted
       build pcmciautils
