@@ -217,9 +217,15 @@ rebuild:
 # prepare the installation media
 #
 media: crumbs/Final.built
+ifeq ($(mTUPLE),$(mARCH))
 	+@(echo -e "\nMaking ISO images with linux$(KERNEL_TYPE)..."; sleep 1; \
 	    $(ARCHset) toolcrib/as_chroot "/build/toolcrib/make_media") \
 	    <$(BUILD_IN) >>$(BUILD_OUT) 2>&1
+else
+	+@(echo -e "\nMaking make_media-sdcard with linux$(KERNEL_TYPE)..."; sleep 1; \
+	    $(ARCHset) toolcrib/as_chroot "/build/toolcrib/make_media-sdcard") \
+	    <$(BUILD_IN) >>$(BUILD_OUT) 2>&1
+endif
 
 # prepare the specified update; the Final phase must have been built first.
 #
