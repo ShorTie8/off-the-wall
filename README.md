@@ -5,6 +5,9 @@ Smoothwall Express 3.1.....plus some.
 ![Travis-CI Build Status Image](https://travis-ci.org/d4t4king/off-the-wall.svg?branch=master)
 
 Newly added:
+* 2017-2-14
+	* Added basic rpi2, rpi3 & odroid-xu4 support By: ShorTie
+
 * 2015-10-29
 	* Added sysstat executables.  Will probably (at least) add a drontab interface to show audit data captured by these tools.  May morph into RRD graphs, and/or an extension of the pgraphs mod.
 	* New Perl Modules

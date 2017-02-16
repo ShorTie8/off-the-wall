@@ -41,7 +41,7 @@ ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi rpi2))
   LINUX = rpi-firmware
 endif
 
-ifeq [ "$KERNEL_MAJOR" >= "4" ] && [ "$KERNEL_MMR" >= "1" ]; then
+ifeq ($(shell echo $(KERNEL_VER)\>=4.1 | bc),1)
 	SWAN = libreswan
 else
 	SWAN = openswan
@@ -63,7 +63,7 @@ INST_PKGS = glibc libsmooth+setup libgcc freetype libpng libdnet \
 	    $(LINUX) openssl openssh httpd smoothd squid freefont \
 	    strace rrdtool cron tcpdump dnsmasq ntp openntpd hdparm hddtemp \
 	    iproute2 gd expat ethtool listtables inotify-tools \
-	    beep2 pcre trafficstats iftop setuids ppp isdn4k-utils rp-pppoe \
+	    beep2 pcre trafficstats iftop setuids ppp rp-pppoe \
 	    ibod dhcpcd eciadsl-synch_bin eciadsl-usermode dhcp snort \
 	    oinkmaster $(SWAN) wireless_tools imspector diffutils clamav \
 	    p3scan siproxd which miniupnpd ez-ipupdate noip \
@@ -71,7 +71,7 @@ INST_PKGS = glibc libsmooth+setup libgcc freetype libpng libdnet \
 	    mtools nano parted xtables-addons cpio dialog \
 	    $(UDEV) lm_sensors xz pcmciautils qemu sysfsutils db \
 	    apcupsd cacert-bundle setkerneltz fping iptraf-ng htop \
-	    coretree $(ADV_PKGS) device-ids
+	    coretree-sdcard $(ADV_PKGS) device-ids
 
 # INST_PKGS notes.
 # cacert-bundle should be installed after openssl.
