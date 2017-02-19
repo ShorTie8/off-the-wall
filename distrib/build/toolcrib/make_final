@@ -259,8 +259,9 @@ fi
       build linux-firmware
    if [ "$mTUPLE" == "rpi2" ] || [ "$mTUPLE" == "rpi3" ]; then
       build rpi-firmware
+      build fake-hwclock
    elif [ "$mTUPLE" == "ODROID-XU3" ]; then
-      echo "filler"
+      build fake-hwclock
    else
       build kernel-drivers
    fi
