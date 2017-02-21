@@ -1,0 +1,3 @@
+STORAGE_DEVNODE=harddisk
+CDROM_DEVNODE=sda
+FS=ext4

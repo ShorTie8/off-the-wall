@@ -1,0 +1,5 @@
+LANGUAGE=en
+HOSTNAME=smoothwall
+KEYMAP=/usr/share/keymaps/i386/qwerty/uk.map.gz
+OPENNESS=halfopen
+
