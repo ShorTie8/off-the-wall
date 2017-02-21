@@ -1,0 +1,11 @@
+#<file system>  <dir>       <type>       <options>         <dump>  <pass>
+proc            /proc        proc         defaults           0       0
+sys             /sys         sysfs        defaults           0       0
+dev             /dev         devtmpfs     defaults           0       0
+devpts          /dev/pts     devpts       defaults           0       0
+/dev/harddisk2  none         swap         sw                 0       0
+
+/dev/harddisk4  /            ext4         defaults,noatime   0       1
+/dev/harddisk1  /boot        vfat         defaults,noatime   0       2
+/dev/harddisk3  /var/log     ext4         defaults,noatime   0       2
+
