@@ -1,0 +1,5 @@
+# Smoothwall Express persistent device names
+  
+# sdcard symlink
+SUBSYSTEM=="block",KERNEL=="mmcblk*", SUBSYSTEMS=="mmc",ENV{DEVTYPE}=="disk",ENV{ID_SERIAL}=="UNK_SERIAL", SYMLINK+="harddisk"
+SUBSYSTEM=="block",KERNEL=="mmcblk*", SUBSYSTEMS=="mmc",ENV{DEVTYPE}=="partition",ENV{ID_SERIAL}=="UNK_SERIAL", SYMLINK+="harddisk%n"
