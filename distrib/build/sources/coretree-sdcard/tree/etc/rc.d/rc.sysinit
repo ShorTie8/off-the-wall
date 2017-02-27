@@ -8,8 +8,8 @@ echo "*.*		-/dev/earlylog/messages" > /dev/earlylog/syslog.conf
 echolog "e" "s" "" "Started early syslogd"
 
 # Initialize the system clock with the hardware clock ASAP
-echolog "e" "s" "" "Initialize the clock"
-/sbin/hwclock --hctosys --localtime
+echolog "e" "s" "" "Starting fake hwclock"
+/sbin/fake-hwclock load force
 
 . /var/smoothwall/main/settings
 
@@ -85,12 +85,12 @@ echolog "e" "s" "" "Make /var/run and /dev/shm tmpfsen, mode 1777"
   chmod 1777 /dev/shm
 )&
 
-# If udev didn't create the /dev/harddisk* symlinks, brute-force them. This should
-#   fix a number of SCSI RAID systems.
-if [ -e /dev/sda4 -a ! -e /dev/harddisk4 ]; then
-  echolog "e" "s" "" "Make missing /dev/harddisk* symlinks to /dev/sda*"
-  for i in "" 1 2 3 4; do
-    ln -s -f /dev/sda$i /dev/harddisk$i
+# If udev didn't create the /dev/harddisk* symlinks, brute-force them.
+if [ -e /dev/mmcblk0p4 -a ! -e /dev/harddisk4 ]; then
+  echolog "e" "s" "" "Make missing /dev/harddisk* symlinks to /dev/mmcblk0*"
+  ln -s -f /dev/mmcblk0 /dev/harddisk
+  for i in 1 2 3 4; do
+    ln -s -f /dev/mmcblk0p$i /dev/harddisk$i
   done
 fi
 

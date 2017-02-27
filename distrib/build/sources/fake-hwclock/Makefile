@@ -27,6 +27,9 @@ install: download
 	mkdir -vp $(PKG_ROOT)/etc/cron.hourly
 	install -m 0755 git/debian/fake-hwclock.cron.hourly $(PKG_ROOT)/etc/cron.hourly/fake-hwclock
 	echo "`date -u '+%Y-%m-%d %H:%M:%S'`" > $(PKG_ROOT)/etc/fake-hwclock.data
+# EnvironmentFile=-/etc/default/fake-hwclock
+	mkdir -vp $(PKG_ROOT)/etc/default
+	install -m 0644 git/etc/default/fake-hwclock $(PKG_ROOT)/etc/default
 
 CLEAN = yes
 clean:

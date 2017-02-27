@@ -71,7 +71,7 @@ INST_PKGS = glibc libsmooth+setup libgcc freetype libpng libdnet \
 	    mtools nano parted xtables-addons cpio dialog \
 	    $(UDEV) lm_sensors xz pcmciautils qemu sysfsutils db \
 	    apcupsd cacert-bundle setkerneltz fping iptraf-ng htop \
-	    coretree-sdcard $(ADV_PKGS) device-ids
+	    coretree-sdcard $(ADV_PKGS) device-ids fake-hwclock
 
 # INST_PKGS notes.
 # cacert-bundle should be installed after openssl.
@@ -249,17 +249,17 @@ endif
 	@echo "      build final tarballs ..." >>$(MEDIA_BUILD_OUT)
 	@echo "        main ..." >>$(MEDIA_BUILD_OUT)
 	@echo -e "\nBuilding smoothwall.tgz, stand by ..."
-	@tar -zcf cdrom/smoothwall.tgz -C distrib .
+#	@tar -zcf cdrom/smoothwall.tgz -C distrib .
 	@echo -n `tar tvf cdrom/smoothwall.tgz |wc -l` > cdrom/smoothwall.tgz.filecount
 	@cp -a cdrom/smoothwall.tgz* cdrom-dev/
 	
 	@echo "        dev ..." >>$(MEDIA_BUILD_OUT)
 	@echo -e "\nBuilding smoothdev.tgz, stand by ..."
-	@tar -zcf cdrom-dev/smoothdev.tgz -C distrib-dev .
+#	@tar -zcf cdrom-dev/smoothdev.tgz -C distrib-dev .
 	
 	@echo "        doc ..." >>$(MEDIA_BUILD_OUT)
 	@echo -e "\nBuilding smoothdoc.tgz, stand by ..."
-	@tar -zcf cdrom-dev/smoothdoc.tgz -C distrib-doc .
+#	@tar -zcf cdrom-dev/smoothdoc.tgz -C distrib-doc .
 	
 	@( \
 	  src_tgz=../../../../smoothsrc.tar.gz; \

@@ -44,6 +44,7 @@ bin:
 	mkdir -p tmp/bin tmp/lib tmp/usr/lib/klibc/bin
 	mkdir -p tmp/sbin
 	cp -aR /sbin/* tmp/bin
+	rm -v tmp/bin/fake-hwclock
 	strip tmp/bin/*
 
 lib:
@@ -119,6 +120,8 @@ endif
 	@touch tmp/cdrominstall
 
 	@/build/toolcrib/striptree tmp
+
+	cp -v 70-Smoothwall-custom-disk.rules tmp/etc/udev/rules.d/70-Smoothwall-custom-disk.rules
 
 	@# Clean extra stuff to shrink the initramfs
 	@for i in tmp/lib/modules/*; do (cd "$$i/kernel"; rm -rf $(NOT_DRIVERS)); done

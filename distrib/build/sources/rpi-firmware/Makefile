@@ -56,6 +56,7 @@ install: download
 
 	install -m 0644 cmdline.txt $(PKG_ROOT)/boot/cmdline.txt
 	install -m 0644 config.txt $(PKG_ROOT)/boot/config.txt
+	sed -i $(PKG_ROOT)/boot/config.txt -e "s/UNAME/$(KERNEL_VER)/"
 
 
 include ../Makefile.rules

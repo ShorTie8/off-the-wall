@@ -14,6 +14,12 @@ distrib:
 	@mkdir distrib;
 	@cp -avR tree/* distrib
 
+ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3))
+	echo "Creating /etc/modules for needed modules"
+	echo "smsc95xx" > distrib/etc/modules
+	echo "snd_bcm2835" >> distrib/etc/modules
+endif
+
 	@chown -R root:root distrib/
 
 	@chmod -v 700 distrib/root

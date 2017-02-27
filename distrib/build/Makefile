@@ -227,6 +227,10 @@ else
 	    <$(BUILD_IN) >>$(BUILD_OUT) 2>&1
 endif
 
+sdcard: sources/media-sdcard/Media.mediaISO.built 
+	@echo -e "\nMaking sdcard..."; sleep 1
+	@+sudo su -c "toolcrib/make_sdcard"
+
 # prepare the specified update; the Final phase must have been built first.
 #
 update: crumbs/Final.built

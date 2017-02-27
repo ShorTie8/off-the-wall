@@ -29,24 +29,18 @@ echo "Mounting devtmpfs"
 /bin/mount -t devpts -o gid=5,mode=620 devpts /dev/pts
 
 # Populating dev
-echo "If you added one or more NICs to an existing system, startup may"
-echo "  hang here for a minute waiting for udev. Please be patient."
+echo "Starting eudev and Populating dev. Please be patient."
 /sbin/udevd --daemon
 /sbin/udevadm hwdb --update
 /sbin/udevadm trigger
-/sbin/udevadm settle
+/sbin/udevadm settle --timeout=30 || echo "udevadm settle failed"
 
 # Load any modules explicitly required
+echo "Loading modules"
 test -e /etc/modules && egrep -v "^$|^#" /etc/modules | while read a; do modprobe $a; done
 
-# Brute-force create harddisk links if udev didn't; this should fix many SCSI/RAID
-#   logical drives.
-# SCSI RAID apparently can take some time to become ready, so try for 15 seconds.
-# Loop testing for the existence of /dev/harddisk4. If udev eventually creates it but
-#   we don't detect it (because we only look for /dev/sda4), the loop will terminate
-#   anyway. Also, if the symlink already exists, the loop doesn't start. Note that it
-#   is still a problem if the driver creates nodes--other than /dev/sda*--for which
-#    udev doesn't have a rule.
+# Brute-force create harddisk links if udev didn't;
+echo "Checking for harddisk symlinks"  
 typeset -i i; i=0
 while [ ! -e "/dev/harddisk4" ]; do
 
@@ -57,13 +51,15 @@ while [ ! -e "/dev/harddisk4" ]; do
 
   # If the partition node is available but the harddisk symlink isn't,
   #   make all of the symlinks and bust out.
-  if [ -e "/dev/sda4" ]; then
+  if [ -e "/dev/mmcblk0p4" ]; then
     # Wait a /12 second, in case udev is about to do it
     sleep .5
     if [ ! -e "/dev/harddisk4" ]; then
-      for NODE in /dev/sda*; do
-        ln -s -f $NODE ${NODE/sda/harddisk}
-      done
+	  echo "Make missing /dev/harddisk* symlinks to /dev/mmcblk0*"
+	  ln -s -f /dev/mmcblk0 /dev/harddisk
+	  for i in 1 2 3 4; do
+		ln -s -f /dev/mmcblk0p$i /dev/harddisk$i
+	  done
     fi
     # Either way, the symlink(s) now exist
     break;
@@ -80,6 +76,7 @@ while [ ! -e "/dev/harddisk4" ]; do
 done
 
 # Switch to hard drive and start the system
+echo "Switch to harddisk and start the system"
 /bin/mount /harddisk -o ro
 
 # Stop udevd; missed events will be caught later
@@ -94,10 +91,34 @@ if [ -f "$PNR" ]; then
   cp "$PNR" /harddisk/dev
 fi
 
+# "UNK_SERIAL"
+echo "Checking for UNK_SERIAL"
+grep "UNK_SERIAL" /harddisk/etc/udev/rules.d/70-Smoothwall-custom-disk.rules
+RC=$?  
+
+if [ "$RC" = "0" ]; then
+	echo "RC=0"
+	echo "Adding Serial # to 70-Smoothwall-custom-disk.rules"
+	/sbin/mount -n -o remount,rw /harddisk
+	sdserial=`/sbin/udevadm info -q all -p /sys/class/block/mmcblk0|egrep -i "serial" | sed -e 's/.*=//'`
+	echo "sdserial = ${sdserial}"
+	sed -i /harddisk/etc/udev/rules.d/70-Smoothwall-custom-disk.rules -e "s/UNK_SERIAL/$sdserial/"
+	cat /harddisk/etc/udev/rules.d/70-Smoothwall-custom-disk.rules
+	echo "Rebooting"
+	sleep 2
+	/sbin/reboot -f
+elif [ "$RC" = "1" ]; then
+	echo "Serial # already in 70-Smoothwall-custom-disk.rules"
+fi
+
 /usr/lib/klibc/bin/nuke /dev
 /bin/ln -s /harddisk/dev /dev
 
 /bin/mount -n --move /sys /harddisk/sys
 /bin/mount -n --move /proc /harddisk/proc
 
+echo "Done with initrd, Starting system"
+sleep 2
+
 exec /usr/lib/klibc/bin/run-init /harddisk /sbin/init </harddisk/dev/console >/harddisk/dev/console 2>&1
+
