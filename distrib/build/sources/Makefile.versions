@@ -22,7 +22,7 @@ else ifeq ($(mTUPLE), rpi2)
     export KERNEL=kernel7
     KERNEL_MAJOR = 3
     KERNEL_MMR = $(KERNEL_MAJOR).18
-    KERNEL_VER = $(KERNEL_MMR).16-v7
+    KERNEL_VER = $(KERNEL_MMR).16-v7+
     KERNEL_COM = 1bb18c8f721ef674a447f3622273f2e2de7a205c
     KERNEL_URL = https://github.com/raspberrypi/linux/archive/$(KERNEL_COM)/linux-$(KERNEL_COM).tar.gz
     K_RAW_VERSION = $(KERNEL_VER)
@@ -30,7 +30,7 @@ else ifeq ($(mTUPLE), rpi3)
     export KERNEL=kernel7
     KERNEL_MAJOR = 4
     KERNEL_MMR = $(KERNEL_MAJOR).1
-    KERNEL_VER = $(KERNEL_MMR).21-v7
+    KERNEL_VER = $(KERNEL_MMR).21-v7+
     KERNEL_COM = ff45bc0e8917c77461b2901e2743e6339bb70413
 #    KERNEL_MAJOR = 4
 #    KERNEL_MMR = $(KERNEL_MAJOR).4

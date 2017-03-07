@@ -49,7 +49,9 @@ compile-kernel: prepare
 ifeq ($(mTUPLE),$(mARCH))
 	sed -e 's/^CONFIG_LOCALVERSION=.*$$/CONFIG_LOCALVERSION="$(KERNEL_TYPE)"/' ../linux.config$(KERNEL_TYPE)-$(mARCH) > linux/.config
 else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3))
-	cd linux-$(KERNEL_VER); make bcm2709_defconfig
+	echo + > linux/.scmversion
+	cd linux; make bcm2709_defconfig
+	#sed -e 's/CONFIG_USB_NET_SMSC95XX=y/CONFIG_USB_NET_SMSC95XX=m/' -i linux/.config
 else ifeq ($(mTUPLE), ODROID-XU3)
 	cd linux-$(KERNEL_VER); make odroidxu3_defconfig
 endif
@@ -88,10 +90,10 @@ ifeq ($(mTUPLE),$(mARCH))
 else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3))
 	echo; echo "Make modules_install"; echo
 	(cd $(PKG_ROOT); make -C $(KERNEL_DIR) CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install)
-	echo; echo; echo "scripts/mkknlimg"; echo
-#	283x: n, xz utils needs upgrade or installed to use
-	#(cd $(KERNEL_DIR); sudo scripts/mkknlimg arch/arm/boot/zImage $(PKG_ROOT)/boot/$(KERNEL).img)
 	mkdir -vp $(PKG_ROOT)/boot/overlays
+	echo; echo; echo "scripts/mkknlimg"; echo
+	(cd $(KERNEL_DIR); scripts/mkknlimg arch/arm/boot/zImage $(KERNEL).img)
+	cp -v $(KERNEL_DIR)/$(KERNEL).img $(PKG_ROOT)/boot/$(KERNEL).img
 	cp -v $(KERNEL_DIR)/System.map $(PKG_ROOT)/boot/System.map-$(K_SWE_VERSION)
 	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/*.dtb $(PKG_ROOT)/boot
 	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/overlays/*.dtb* $(PKG_ROOT)/boot/overlays/

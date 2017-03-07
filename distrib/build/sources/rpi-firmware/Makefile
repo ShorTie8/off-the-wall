@@ -46,13 +46,24 @@ install: download
 	mkdir -p $(PKG_ROOT)
 
 	mkdir -vp $(PKG_ROOT)/boot
-	cp -avR $(DIR)/boot/* $(PKG_ROOT)/boot
+	#cp -avR $(DIR)/boot/* $(PKG_ROOT)/boot
+	install -m 0644 $(DIR)/boot/LICENCE.broadcom $(PKG_ROOT)/boot/LICENCE.broadcom
+	install -m 0644 $(DIR)/boot/bootcode.bin $(PKG_ROOT)/boot/bootcode.bin
+	install -m 0644 $(DIR)/boot/fixup_cd.dat $(PKG_ROOT)/boot/fixup_cd.dat
+	install -m 0644 $(DIR)/boot/fixup.dat $(PKG_ROOT)/boot/fixup.dat
+	install -m 0644 $(DIR)/boot/fixup_db.dat $(PKG_ROOT)/boot/fixup_db.dat
+	install -m 0644 $(DIR)/boot/fixup_x.dat $(PKG_ROOT)/boot/fixup_x.dat
+	install -m 0644 $(DIR)/boot/start_cd.elf $(PKG_ROOT)/boot/start_cd.elf
+	install -m 0644 $(DIR)/boot/start_db.elf $(PKG_ROOT)/boot/start_db.elf
+	install -m 0644 $(DIR)/boot/start.elf $(PKG_ROOT)/boot/start.elf
+	install -m 0644 $(DIR)/boot/start_x.elf $(PKG_ROOT)/boot/start_x.elf
+
 
 	mkdir -vp $(PKG_ROOT)/opt
 	cp -avR $(DIR)/opt/* $(PKG_ROOT)/opt
 
-	mkdir -vp $(PKG_ROOT)/lib/modules
-	cp -avR $(DIR)/modules/* $(PKG_ROOT)/lib/modules
+	#mkdir -vp $(PKG_ROOT)/lib/modules
+	#cp -avR $(DIR)/modules/* $(PKG_ROOT)/lib/modules
 
 	install -m 0644 cmdline.txt $(PKG_ROOT)/boot/cmdline.txt
 	install -m 0644 config.txt $(PKG_ROOT)/boot/config.txt

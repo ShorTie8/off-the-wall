@@ -37,8 +37,10 @@ ADV_PKGS = gdbm GeoIP Python libmnl openldap gperf attr \
 	   subversion ntop iperf
 KVM_PKGS = samba
 
-ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi rpi2))
-  LINUX = rpi-firmware
+ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3))
+  LINUX = linux rpi-firmware
+else ifeq ($(mTUPLE),ODROID-XU3)
+  LINUX = linux
 endif
 
 ifeq ($(shell echo $(KERNEL_VER)\>=4.1 | bc),1)
