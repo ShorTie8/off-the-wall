@@ -16,8 +16,11 @@ distrib:
 
 ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi2 rpi3))
 	echo "Creating /etc/modules for needed modules"
-	echo "smsc95xx" > distrib/etc/modules
+	#echo "smsc95xx" > distrib/etc/modules
 	echo "snd_bcm2835" >> distrib/etc/modules
+	echo "" >> distrib/etc/inittab
+	echo "#Spawn a getty on Raspberry Pi serial line" >> distrib/etc/inittab
+	echo "T0:23:respawn:/sbin/agetty -L ttyAMA0 115200 vt100" >> distrib/etc/inittab
 endif
 
 	@chown -R root:root distrib/
@@ -28,6 +31,7 @@ endif
 	@chmod -v 644 distrib/etc/crontab
 	@chmod -v 644 distrib/etc/logrotate.conf
 	@chmod -v 644 distrib/etc/logrotate.d/*
+	@chmod -v 664 distrib/var/smoothwall/main/settings
 
 	@chown -R nobody:nobody distrib/var/smoothwall
 	@chown -R nobody:nobody distrib/var/smoothwall-*
