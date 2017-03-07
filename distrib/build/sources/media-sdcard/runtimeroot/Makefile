@@ -53,9 +53,7 @@ lib:
 	cp -aR /lib/lib* tmp/lib
 	cp -aR /usr/lib/libncurses.so* tmp/lib/
 	cp -aR /usr/lib/libtinfo.so* tmp/lib/
-ifeq ($(mTUPLE),ODROID-XU3)
 	tar xfz /build/target/smoothwall-linux$(KERNEL_TYPE).tar.gz -C tmp ./lib/modules > /dev/null 2>&1
-endif
 
 klibc:
 	cp -aR /build/buildroot/klibc/usr/lib/klibc/lib/klibc-*.so tmp/lib
