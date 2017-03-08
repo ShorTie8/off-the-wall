@@ -15,9 +15,15 @@ EXTENSION = .tar.bz2
 
 PATCH_FILE1 = bc-1.06.95-memory_leak-1.patch
 
+# Final Build Stage
+#
+ifeq ($(BUILD_PHASE), Final)
+
 CONFIG_OPTS = --prefix=/usr \
 	      --with-readline \
 	      --mandir=/usr/share/man \
 	      --infodir=/usr/share/info
+
+endif # Stage Final
 
 include ../Makefile.rules
